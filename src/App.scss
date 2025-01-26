@@ -39,12 +39,18 @@ header {
 	text-align: center;
 	overflow: hidden;
 	background-color: #e9d5a1;
-	-webkit-background-size: cover;
-	-moz-background-size: cover;
-	-o-background-size: cover;
-	background-size: cover;
 	padding-top: 150px;
 	padding-bottom: 0;
+
+	h1 {
+		font-size: 100%;
+		text-align: center;
+		font-weight: 250 !important;
+		color: #353239;
+		font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+		margin: 0 auto 18px auto;
+		width: 100%;
+	}
 }
 
 .language-icon {
@@ -79,14 +85,43 @@ header {
 	padding-top: 80px;
 }
 
-header h1 {
-	font-size: 400%;
-	text-align: center;
-	font-weight: 600 !important;
+.Typewriter__wrapper {
+	font-size: 2.2em;
 	color: #353239;
-	font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-	margin: 0 auto 18px auto;
-	width: 100%;
+	font-weight: 600;
+	letter-spacing: 1px;
+}
+
+.Typewriter__cursor {
+	font-size: 2.4em;
+	color: #353239;
+}
+
+@media (max-width: 1200px) {
+	header h1 {
+		font-size: 350% !important;
+	}
+	.Typewriter__wrapper {
+		font-size: 2em;
+	}
+}
+
+@media (max-width: 768px) {
+	header h1 {
+		font-size: 300% !important;
+	}
+	.Typewriter__wrapper {
+		font-size: 1.8em;
+	}
+}
+
+@media (max-width: 480px) {
+	header h1 {
+		font-size: 250% !important;
+	}
+	.Typewriter__wrapper {
+		font-size: 1.5em;
+	}
 }
 
 .slider-image {

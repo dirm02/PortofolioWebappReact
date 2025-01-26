@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import Typewriter from "typewriter-effect";
 import Switch from "react-switch";
-import "./Header.css";
 
 class Header extends Component {
   titles = [];
