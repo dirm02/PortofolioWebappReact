@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import Typewriter from "typewriter-effect";
 import Switch from "react-switch";
+import "./Header.css";
 
 class Header extends Component {
   titles = [];
@@ -53,8 +54,12 @@ class Header extends Component {
               <br/>
               <h1 className="mb-0">
                 <Typewriter
-                  onInit={(typewriter) => {
-                    typewriter.typeString(name).start();
+                  options={{
+                    strings: [name],
+                    autoStart: true,
+                    loop: true,
+                    cursor: "",
+                    delay: 75
                   }}
                 />
               </h1>

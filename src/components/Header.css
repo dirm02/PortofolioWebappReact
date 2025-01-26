@@ -1,0 +1,122 @@
+.header-icon {
+  height: 150px;
+  width: 150px;
+  margin: 0 auto;
+  display: block;
+}
+
+header h1 {
+  font-size: 4rem !important;
+  font-weight: bold;
+  color: #1f1f1f;
+  text-align: center;
+}
+
+.dark-mode header h1 {
+  color: #fff;
+}
+
+.title-container {
+  text-align: center;
+  font-size: 2.5rem !important;
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+.title-container .Typewriter {
+  display: inline-block;
+  font-weight: 500;
+}
+
+.title-container .Typewriter__wrapper {
+  font-size: 2.5rem;
+  color: #1f1f1f;
+}
+
+.dark-mode .title-container .Typewriter__wrapper {
+  color: #fff;
+}
+
+.title-container .Typewriter__cursor {
+  font-size: 2.5rem;
+}
+
+/* Day/Night Toggle Switch Styles */
+.react-switch {
+  vertical-align: middle;
+  margin-top: 30px;
+}
+
+.react-switch-bg {
+  height: 40px !important;
+}
+
+.react-switch-handle {
+  height: 36px !important;
+  width: 36px !important;
+  top: 2px !important;
+}
+
+/* Icon styles within the switch */
+.react-switch .iconify {
+  position: relative !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  height: 100% !important;
+  width: auto !important;
+  padding: 5px !important;
+}
+
+/* Profile Image Styles */
+.polaroid {
+  background: #fff;
+  padding: 1rem;
+  box-shadow: 0 0.2rem 1.2rem rgba(0,0,0,0.2);
+}
+
+.polaroid img {
+  width: 250px;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 5%;
+  margin-bottom: 20px;
+  display: block;
+  max-width: 100%;
+}
+
+.polaroid span {
+  background: #ffffff;
+  display: inline-block;
+  margin: 55px 75px 30px;
+  padding: 15px 15px 30px;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, .3);
+  transition: all .20s linear;
+  z-index: 0;
+  position: relative;
+}
+
+/* Switch Container Styles */
+#icon-switch {
+  margin: 20px auto;
+  display: block;
+}
+
+/* Switch Icons Container */
+.react-switch-bg > div {
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Individual Icons in Switch */
+.react-switch span.iconify {
+  font-size: 24px !important;
+  margin: 0 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+} 
