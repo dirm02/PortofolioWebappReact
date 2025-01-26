@@ -1,13 +1,13 @@
 import React, { Component } from "react";
 import { Icon } from "@iconify/react";
-import angularIcon from "@iconify/icons-logos/angular-icon";
-import reactIcon from "@iconify/icons-logos/react";
-import vueIcon from "@iconify/icons-logos/vue";
+//import angularIcon from "@iconify/icons-logos/angular-icon";
+//import reactIcon from "@iconify/icons-logos/react";
+//import vueIcon from "@iconify/icons-logos/vue";
 import chemistryIcon from "@iconify/icons-mdi/flask";
 import physicsIcon from "@iconify/icons-mdi/atom";
 import mathIcon from "@iconify/icons-mdi/calculator";
-import pythonIcon from "@iconify/icons-logos/python";
-import javaIcon from "@iconify/icons-logos/java";
+//import pythonIcon from "@iconify/icons-logos/python";
+//import javaIcon from "@iconify/icons-logos/java";
 import javascriptIcon from "@iconify/icons-logos/javascript";
 
 class About extends Component {
