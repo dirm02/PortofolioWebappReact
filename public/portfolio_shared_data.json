@@ -1,0 +1,68 @@
+{
+    "basic_info": {
+      "name": "Mohamad Dirieh",
+      "titles": [ "Help Desk", "Service Desk", "Subject Expert Matter", "IT Support","Technical Support" , "Point of Sales Consultant", "System Admin", "Front-end Developer"  ],
+      "social": [
+        {
+          "name": "github",
+          "url": "https://github.com/dirm02",
+          "class": "fab fa-github"
+        },
+        {
+          "name": "twitter",
+          "url": "https://X.com",
+          "class": "fab fa-twitter" 
+        }
+      ],
+      "image": "myProfile2.png"
+    },
+    "skills": {
+      "icons": [
+        {
+          "name": "HTML",
+          "class": "devicon-html5-plain",
+          "level": "95"
+        },
+        {
+          "name": "CSS",
+          "class": "devicon-css3-plain",
+          "level": "95"
+        },
+        {
+          "name": "React",
+          "class": "devicon-react-plain",
+          "level": "80"
+        },
+        {
+          "name": "TypeScript",
+          "class": "devicon-typescript-plain",
+          "level": "90"
+        },
+        {
+          "name": "JavaScript",
+          "class": "devicon-javascript-plain",
+          "level": "70"
+        },
+        {
+          "name": "Express",
+          "class": "devicon-express-original",
+          "level": "75"
+        },
+        {
+          "name": "Bootstrap",
+          "class": "devicon-bootstrap-plain",
+          "level": "85"
+        },
+        {
+          "name": "Java",
+          "class": "devicon-java-plain",
+          "level": "65"
+        },
+        {
+          "name": "MySql",
+          "class": "devicon-mysql-plain",
+          "level": "60"
+        }
+      ]
+    }
+  }

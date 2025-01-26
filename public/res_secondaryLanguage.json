@@ -1,0 +1,170 @@
+{
+  "basic_info": {
+    
+      "description_header": "Bonjour ! Je suis activement à la recherche d'un poste de développeur front-end junior.",
+      "description": "👋 Je suis une personne énergique et passionnée avec des expériences et des compétences transférables acquises dans divers contextes. J'accorde une grande attention aux détails pour garantir l'exactitude des tâches. Je suis un bon communicateur avec des compétences exceptionnelles en gestion du temps et en organisation. Je possède des compétences analytiques, de résolution de problèmes et de prise de décision bien développées. Je suis une personne pleine de ressources et collaborative, désireuse d'apprendre et de grandir dans un environnement de travail dynamique.",
+      "section_name": {
+      "about": "Salut, Je me présente.",
+      "projects": "Projects",
+      "skills": "Skills",
+      "experience": "Experience"
+    }
+  },
+  "projects": [
+    {
+      "title": "Upwork-Freelancer",
+      "startDate": "2024",
+      "description": "Freelance Upwork et GURU. J'ai commencé à accepter des projets en freelance afin d'acquérir de l'expérience et de me constituer un portfolio. J'ai travaillé sur divers projets, notamment le développement web, le développement d'applications mobiles et le développement de logiciels. Comme vous pouvez le constater, mes compétences sont diversifiées et je suis toujours à la recherche d'opportunités pour apprendre et grandir. Mes nombreux avis positifs et les commentaires de mes clients témoignent de mon dévouement et de mon engagement à fournir un travail de haute qualité.",
+      "images":[
+        "images/portfolio/Project1/Freelancer-com.png",
+        "images/portfolio/Project1/Freelancer-reviews.png",
+        "images/portfolio/Project1/Upwork-Freelancer.png",
+        "images/portfolio/Project1/Upwork-reviews.png"
+      ],
+      "url": "",
+      "technologies": [
+        {
+          "class": "devicon-matlab-plain",
+          "name": "MatLab"
+        },
+        {
+          "class": "devicon-python-plain",
+          "name": "Python"
+        },
+        {
+          "class": "devicon-csharp-plain",
+          "name": "Swift"
+        }
+      ]
+    },
+    {
+      "title": "Flight Tracker",
+      "startDate": "2024",
+      "description": "Suivi des vols est une application web qui permet aux utilisateurs de suivre les vols et de consulter les détails de chaque vol. L'application a été développée en utilisant HTML, CSS et un appel à une API.",
+      "images": [
+        "images/portfolio/Project2/FlightTrackProj.png"
+      ],
+      "url": "https://github.com/dirm02/FlightTracker.git",
+      "technologies": [
+        {
+          "class": "devicon-react-original",
+          "name": "React"
+        },
+        {
+          "class": "devicon-html5-plain",
+          "name": "HTML"
+        },
+        {
+          "class": "devicon-css3-plain",
+          "name": "CSS"
+        },
+        {
+          "class": "devicon-javascript-plain",
+          "name": "JavaScript"
+        }
+      ]
+    },
+    {
+      "title": "Angular FastAPI  Python",
+      "startDate": "Jul.2024",
+      "description": "L'une des nombreuses applications sur lesquelles j'ai eu le privilège de travailler. J'étais responsable du développement d'une application d'exploration de cours qui permet aux utilisateurs de rechercher des cours et de consulter les détails de chaque cours. L'application a été développée avec FastAPI pour le backend et Angular pour le frontend.",
+      "images": [
+        "images/portfolio/Project3/AngularProj.png"
+      ],
+      "url": "https://github.com/dirm02/course_explorer-fastapi_angular-",
+      "technologies": [
+        {
+          "class": "devicon-angularjs-plain",
+          "name": "Angular"
+        },
+        {
+          "class": "devicon-typescript-plain",
+          "name": "TypeScript"
+        },
+        {
+          "class": "devicon-api-plain",
+          "name": "FastAPI"
+        }
+      ]
+    }
+  ],
+  "experience": [
+    {
+      "company": "Outlier",
+      "title": "Training AI how to Code",
+      "years": "Dec.2024 - present",
+      "mainTech": [
+        "Developer"
+      ],
+      "technologies": [
+        "OpenAI",
+        "ChatGPT",
+        "Claude",
+        "Mistral",          
+        "Gemini",
+        "Gemini Pro"
+      ]
+    },
+    {
+      "company": "Thrid Bridge Consultant firm",
+        "title": "Software Developer",
+        "years": "Sep.2024 - present",
+        "mainTech": [
+          "Consultant"
+        ],
+        "technologies": [
+          "Web Development",
+          "Software Development",
+          "IoT Development",
+          "Mobile App Development",          
+          "Networking",
+          "Consulting"
+      ]
+    },
+    {
+      "company": "Sobeys & Soroc - Canadian Tire Gas Bars",
+      "title": "Point of Sale Technician",
+      "years": "Jun.2021 - Dec.2024",
+      "mainTech": [
+        "IT Support"
+      ],
+      "technologies": [
+        "Ticketing System",
+        "Technical Writing",
+        "Microsoft 365",
+        "Excel",          
+        "SharePoint",
+        "AssystNet"
+      ]
+    },
+    {
+      "company": "Fujitsu",
+      "title": "Software Analyst",
+      "years": "Nov.2020 - Feb.2021",
+      "mainTech": [
+        "Java - Spring Boot"
+      ],
+      "technologies": [
+        "JavaScript",
+        "Bootstrap",
+        "MySQL",
+        "Oracle"
+      ]
+    },
+    {
+      "company": "Shared Services Canada",
+      "title": "Service Desk Analyst",
+      "years": "Dec.2018 - Aug.2020",
+      "mainTech": [
+        "Analyst"
+      ],
+      "technologies": [
+        "Ticketing System",
+        "Microsoft 365",
+        "Excel",
+        "Power BI",
+        "SharePoint"
+      ]
+    }
+  ]
+}
