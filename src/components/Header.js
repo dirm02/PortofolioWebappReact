@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import Typical from "react-typical";
+import Typed from "react-typed";
 import Switch from "react-switch";
 
 class Header extends Component {
@@ -27,12 +27,21 @@ class Header extends Component {
   render() {
     if (this.props.sharedData) {
       var name = this.props.sharedData.name;
-      this.titles = this.props.sharedData.titles.map(x => [ x.toUpperCase(), 1500 ] ).flat();
+      this.titles = this.props.sharedData.titles;
     }
 
-    const HeaderTitleTypeAnimation = React.memo( () => {
-      return <Typical className="title-styles" steps={this.titles} loop={50} />
-    }, (props, prevProp) => true);
+    const HeaderTitleTypeAnimation = React.memo(() => {
+      return (
+        <Typed
+          strings={this.titles}
+          typeSpeed={50}
+          backSpeed={50}
+          backDelay={1000}
+          loop
+          smartBackspace
+        />
+      );
+    });
 
     return (
       <header id="home" style={{ height: window.innerHeight - 140, display: 'block' }}>
@@ -42,7 +51,7 @@ class Header extends Component {
               <span className="iconify header-icon" data-icon="la:laptop-code" data-inline="false"></span>
               <br/>
               <h1 className="mb-0">
-                <Typical steps={[name]} wrapper="p" />
+                <Typed strings={[name]} typeSpeed={50} />
               </h1>
               <div className="title-container">
                 <HeaderTitleTypeAnimation />
