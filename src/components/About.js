@@ -3,6 +3,12 @@ import { Icon } from "@iconify/react";
 import angularIcon from "@iconify/icons-logos/angular-icon";
 import reactIcon from "@iconify/icons-logos/react";
 import vueIcon from "@iconify/icons-logos/vue";
+import chemistryIcon from "@iconify/icons-mdi/flask";
+import physicsIcon from "@iconify/icons-mdi/atom";
+import mathIcon from "@iconify/icons-mdi/calculator";
+import pythonIcon from "@iconify/icons-logos/python";
+import javaIcon from "@iconify/icons-logos/java";
+import javascriptIcon from "@iconify/icons-logos/javascript";
 
 class About extends Component {
   render() {
@@ -31,16 +37,20 @@ class About extends Component {
                     alt="Avatar placeholder"
                   />
                   <Icon
-                    icon={angularIcon}
-                    style={{ fontSize: "400%", margin: "9% 5% 0 5%" }}
+                    icon={chemistryIcon}
+                    style={{ fontSize: "200%", margin: "9% 5% 0 5%" }}
                   />
                   <Icon
-                    icon={reactIcon}
-                    style={{ fontSize: "400%", margin: "9% 5% 0 5%" }}
+                    icon={physicsIcon}
+                    style={{ fontSize: "200%", margin: "9% 5% 0 5%" }}
                   />
                   <Icon
-                    icon={vueIcon}
-                    style={{ fontSize: "400%", margin: "9% 5% 0 5%" }}
+                    icon={mathIcon}
+                    style={{ fontSize: "200%", margin: "9% 5% 0 5%" }}
+                  />
+                  <Icon
+                    icon={javascriptIcon}
+                    style={{ fontSize: "200%", margin: "9% 5% 0 5%" }}
                   />
                 </span>
               </div>
