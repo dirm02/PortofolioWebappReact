@@ -25,9 +25,9 @@
     "react-vertical-timeline-component": "^3.6.0"
   },
   "scripts": {
-    "start": "set NODE_OPTIONS=--openssl-legacy-provider && react-scripts start",
+    "start": "react-scripts start",
     "dev": "nodemon --watch src --ignore node_modules --ext js,jsx,ts,tsx,json,css,scss,html --exec \"npm start\"",
-    "build": "set NODE_OPTIONS=--openssl-legacy-provider && react-scripts build",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
