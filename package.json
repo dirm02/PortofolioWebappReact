@@ -2,6 +2,9 @@
   "name": "react-frontend-dev-portfolio",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "@iconify/icons-mdi": "^1.2.48",
     "@testing-library/jest-dom": "^6.1.5",
