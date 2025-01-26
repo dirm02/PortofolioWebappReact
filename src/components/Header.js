@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import Typed from "react-typed";
+import Typewriter from "typewriter-effect";
 import Switch from "react-switch";
 
 class Header extends Component {
@@ -32,13 +32,14 @@ class Header extends Component {
 
     const HeaderTitleTypeAnimation = React.memo(() => {
       return (
-        <Typed
-          strings={this.titles}
-          typeSpeed={50}
-          backSpeed={50}
-          backDelay={1000}
-          loop
-          smartBackspace
+        <Typewriter
+          options={{
+            strings: this.titles,
+            autoStart: true,
+            loop: true,
+            deleteSpeed: 50,
+            delay: 50
+          }}
         />
       );
     });
@@ -51,7 +52,11 @@ class Header extends Component {
               <span className="iconify header-icon" data-icon="la:laptop-code" data-inline="false"></span>
               <br/>
               <h1 className="mb-0">
-                <Typed strings={[name]} typeSpeed={50} />
+                <Typewriter
+                  onInit={(typewriter) => {
+                    typewriter.typeString(name).start();
+                  }}
+                />
               </h1>
               <div className="title-container">
                 <HeaderTitleTypeAnimation />

@@ -21,7 +21,7 @@
     "react-ga": "^3.3.1",
     "react-scripts": "5.0.1",
     "react-switch": "^7.0.0",
-    "react-typed": "^1.2.0",
+    "typewriter-effect": "^2.21.0",
     "react-vertical-timeline-component": "^3.6.0"
   },
   "scripts": {
