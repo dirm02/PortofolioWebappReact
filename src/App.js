@@ -70,6 +70,9 @@ class App extends Component {
   };
 
   componentDidMount() {
+    console.log('=== App Initialization Debug ===');
+    console.log('Component mounting, checking for view counter...');
+    
     this.loadSharedData();
     this.applyPickedLanguage(
       window.$primaryLanguage,
@@ -79,13 +82,14 @@ class App extends Component {
     // Check if this is a new visit
     const visitCookie = getCookie('lastVisit');
     const now = new Date().getTime();
+    console.log('Current cookie status:', { visitCookie, now });
     
     if (!visitCookie || (now - parseInt(visitCookie)) > 24 * 60 * 60 * 1000) {
-      // If no cookie exists or it's older than 24 hours, increment the view count
+      console.log('No cookie or expired, incrementing view count...');
       this.incrementViewCount();
-      setCookie('lastVisit', now, 1); // Set cookie to expire in 1 day
+      setCookie('lastVisit', now, 1);
     } else {
-      // Just fetch the current count without incrementing
+      console.log('Recent visit detected, fetching current count...');
       this.fetchCurrentCount();
     }
   }
@@ -132,6 +136,9 @@ class App extends Component {
 
   fetchCurrentCount = async () => {
     try {
+      console.log('=== Fetching View Count ===');
+      console.log('Requesting current count from:', `${BACKEND_URL}/api/views`);
+      
       const response = await fetch(`${BACKEND_URL}/api/views`, {
         method: 'GET',
         headers: {
@@ -140,13 +147,28 @@ class App extends Component {
         }
       });
       
+      console.log('Response status:', response.status);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+      
       const data = await response.json();
+      console.log('Received view count data:', data);
+      
+      if (data.views === 0) {
+        console.warn('Warning: Received zero views from backend!');
+        console.log('Backend URL:', BACKEND_URL);
+        console.log('Current state:', this.state);
+      }
+      
       this.setState({ peepBasterds: data.views });
+      console.log('View count updated in state:', data.views);
     } catch (error) {
-      console.error('Error fetching view count:', error);
+      console.error('=== View Counter Error ===');
+      console.error('Error details:', error.message);
+      console.error('Stack:', error.stack);
+      console.error('Backend URL:', BACKEND_URL);
+      console.error('Current state:', this.state);
     }
   };
 

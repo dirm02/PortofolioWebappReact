@@ -39,32 +39,72 @@ let visitors = new Map();
 
 // Load existing data
 try {
+  console.log('=== Loading Visitor Data ===');
+  console.log('Visitors file path:', visitorsFile);
+  
   if (fs.existsSync(visitorsFile)) {
-    const data = JSON.parse(fs.readFileSync(visitorsFile));
+    const fileContent = fs.readFileSync(visitorsFile);
+    console.log('File exists, size:', fileContent.length, 'bytes');
+    
+    const data = JSON.parse(fileContent);
+    console.log('Parsed data:', {
+      totalViews: data.totalViews,
+      visitorCount: Object.keys(data.visitors || {}).length,
+      lastUpdated: data.lastUpdated
+    });
+    
     totalViews = data.totalViews || 0;
     visitors = new Map(Object.entries(data.visitors || {}));
+  } else {
+    console.log('No existing visitors file found, creating new data');
+    totalViews = 0;
+    visitors = new Map();
+    saveVisitors(); // Create initial file
   }
 } catch (err) {
   console.error('Error reading visitors file:', err);
+  console.error('Stack:', err.stack);
+  console.error('Current directory:', __dirname);
 }
 
 // Save visitors to file
 function saveVisitors() {
   try {
+    console.log('=== Saving Visitor Data ===');
     const data = {
       totalViews,
       visitors: Object.fromEntries(visitors),
       lastUpdated: new Date().toISOString()
     };
+    console.log('Data to save:', {
+      totalViews: data.totalViews,
+      visitorCount: Object.keys(data.visitors).length,
+      lastUpdated: data.lastUpdated
+    });
+    
     fs.writeFileSync(visitorsFile, JSON.stringify(data, null, 2));
+    console.log('Data saved successfully');
+    
+    // Verify the save
+    const savedContent = fs.readFileSync(visitorsFile, 'utf8');
+    const savedData = JSON.parse(savedContent);
+    console.log('Verified saved data:', {
+      totalViews: savedData.totalViews,
+      visitorCount: Object.keys(savedData.visitors).length,
+      lastUpdated: savedData.lastUpdated
+    });
   } catch (err) {
     console.error('Error saving visitors:', err);
+    console.error('Stack:', err.stack);
+    console.error('Attempted to save to:', visitorsFile);
   }
 }
 
 // Routes
 app.get('/api/views', (req, res) => {
-  console.log('GET /api/views called');
+  console.log('=== GET /api/views called ===');
+  console.log('Current total views:', totalViews);
+  console.log('Number of unique visitors:', visitors.size);
   res.json({ views: totalViews });
 });
 
