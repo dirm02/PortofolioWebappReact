@@ -1,9 +1,7 @@
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import ReactDOM from 'react-dom';
 import './index.scss';
 import App from './App';
-import * as serviceWorker from './serviceWorker';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 /* GLOBAL VARIABLES */
 
@@ -12,12 +10,7 @@ window.$secondaryLanguage = 'fr';
 window.$primaryLanguageIconId = 'primary-lang-icon';
 window.$secondaryLanguageIconId = 'secondary-lang-icon';
 
-const container = document.getElementById('root');
-const root = createRoot(container);
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+ReactDOM.render(
+    <App />,
+  document.getElementById('root')
 );
-
-serviceWorker.register();
