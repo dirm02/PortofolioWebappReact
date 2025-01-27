@@ -75,10 +75,12 @@ class App extends Component {
 
   incrementViewCount = async () => {
     try {
-      console.log('Attempting to increment view count');
-      console.log('Backend URL:', process.env.REACT_APP_BACKEND_URL);
+      console.log('=== View Counter Debug Info ===');
+      console.log('Frontend URL:', window.location.href);
+      console.log('Backend URL:', BACKEND_URL);
+      console.log('Attempting to increment view count...');
       
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/views`, {
+      const response = await fetch(`${BACKEND_URL}/api/views`, {
         method: 'POST',
         headers: {
           'Cache-Control': 'no-cache',
@@ -89,12 +91,19 @@ class App extends Component {
       });
       
       console.log('Response status:', response.status);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       console.log('Response data:', data);
+      console.log('=== End Debug Info ===');
       
       this.setState({ peepBasterds: data.views });
     } catch (error) {
-      console.error('Error incrementing view count:', error);
+      console.error('=== View Counter Error ===');
+      console.error('Error details:', error.message);
+      console.error('Stack:', error.stack);
+      console.error('=== End Error ===');
     }
   };
 
