@@ -9,15 +9,22 @@ const app = express();
 // Load environment variables
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
-const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS ? 
-  process.env.ALLOWED_ORIGINS.split(',') : 
-  ['https://onlineprofile613dee.netlify.app'];
+const ALLOWED_ORIGINS = ['https://onlineprofile613dee.netlify.app'];
 
 // CORS configuration
 const corsOptions = {
-  origin: ALLOWED_ORIGINS,
-  optionsSuccessStatus: 200,
-  credentials: true
+  origin: function (origin, callback) {
+    if (!origin || ALLOWED_ORIGINS.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('Origin not allowed:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Cache-Control', 'Pragma'],
+  credentials: true,
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
