@@ -15,7 +15,7 @@ window.$primaryLanguageIconId = 'primary-lang-icon';
 window.$secondaryLanguageIconId = 'secondary-lang-icon';
 
 // Backend URL configuration
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://portofoliowebappreact-backend.onrender.com';
 
 class App extends Component {
   constructor(props) {
