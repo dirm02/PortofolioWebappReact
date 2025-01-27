@@ -17,6 +17,20 @@ window.$secondaryLanguageIconId = 'secondary-lang-icon';
 // Backend URL configuration
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://portofoliowebappreact-backend.onrender.com';
 
+// Cookie helper functions
+const setCookie = (name, value, days) => {
+  const date = new Date();
+  date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+  document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
+};
+
+const getCookie = (name) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+};
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -61,9 +75,18 @@ class App extends Component {
       window.$primaryLanguage,
       window.$secondaryLanguageIconId
     );
-    if (!this.hasIncrementedView) {
+    
+    // Check if this is a new visit
+    const visitCookie = getCookie('lastVisit');
+    const now = new Date().getTime();
+    
+    if (!visitCookie || (now - parseInt(visitCookie)) > 24 * 60 * 60 * 1000) {
+      // If no cookie exists or it's older than 24 hours, increment the view count
       this.incrementViewCount();
-      this.hasIncrementedView = true;
+      setCookie('lastVisit', now, 1); // Set cookie to expire in 1 day
+    } else {
+      // Just fetch the current count without incrementing
+      this.fetchCurrentCount();
     }
   }
 
@@ -104,6 +127,26 @@ class App extends Component {
       console.error('Error details:', error.message);
       console.error('Stack:', error.stack);
       console.error('=== End Error ===');
+    }
+  };
+
+  fetchCurrentCount = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/views`, {
+        method: 'GET',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      this.setState({ peepBasterds: data.views });
+    } catch (error) {
+      console.error('Error fetching view count:', error);
     }
   };
 

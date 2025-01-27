@@ -68,25 +68,24 @@ app.post('/api/views', (req, res) => {
   
   const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
   const now = Date.now();
+  const lastVisit = visitors.get(ip)?.lastVisit || 0;
   
-  // If this IP hasn't been recorded before, increment total views
-  if (!visitors.has(ip)) {
-    console.log('New visitor detected');
+  // Only count as a new view if:
+  // 1. This IP hasn't been seen before, or
+  // 2. It's been more than 24 hours since their last visit
+  if (!visitors.has(ip) || (now - lastVisit) > 24 * 60 * 60 * 1000) {
+    console.log('New visit detected - incrementing count');
     totalViews++;
     visitors.set(ip, {
-      firstVisit: now,
+      firstVisit: visitors.get(ip)?.firstVisit || now,
       lastVisit: now,
-      visits: 1
+      visits: (visitors.get(ip)?.visits || 0) + 1
     });
+    saveVisitors();
   } else {
-    console.log('Returning visitor detected');
-    const visitorData = visitors.get(ip);
-    visitorData.lastVisit = now;
-    visitorData.visits++;
-    visitors.set(ip, visitorData);
+    console.log('Returning visitor within 24 hours - not incrementing count');
   }
   
-  saveVisitors();
   console.log('Current total views:', totalViews);
   res.json({ views: totalViews });
 });
