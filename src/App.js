@@ -110,6 +110,8 @@ class App extends Component {
       const response = await fetch(`${BACKEND_URL}/api/views`, {
         method: 'POST',
         headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
           'Content-Type': 'application/json'
         },
         credentials: 'include'
@@ -133,7 +135,7 @@ class App extends Component {
   };
 
   fetchCurrentCount = async () => {
-    const maxRetries = 5;
+    const maxRetries = 5; // Increased retries for warm-up period
     let retryCount = 0;
     
     const tryFetch = async () => {
@@ -144,9 +146,9 @@ class App extends Component {
         const response = await fetch(`${BACKEND_URL}/api/views`, {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include'
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
         });
         
         console.log('Response status:', response.status);
@@ -251,7 +253,7 @@ class App extends Component {
           >
             <span
               className="iconify language-icon mr-5"
-              data-icon="twemoji-flag-for-flag-united-kingdom"
+              data-icon="twemoji-flag-for-flag-canada"
               data-inline="false"
               id={window.$primaryLanguageIconId}
             ></span>
