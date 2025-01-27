@@ -110,8 +110,6 @@ class App extends Component {
       const response = await fetch(`${BACKEND_URL}/api/views`, {
         method: 'POST',
         headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
           'Content-Type': 'application/json'
         },
         credentials: 'include'
@@ -135,7 +133,7 @@ class App extends Component {
   };
 
   fetchCurrentCount = async () => {
-    const maxRetries = 5; // Increased retries for warm-up period
+    const maxRetries = 5;
     let retryCount = 0;
     
     const tryFetch = async () => {
@@ -146,9 +144,9 @@ class App extends Component {
         const response = await fetch(`${BACKEND_URL}/api/views`, {
           method: 'GET',
           headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
         });
         
         console.log('Response status:', response.status);

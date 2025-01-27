@@ -12,23 +12,28 @@ const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const ALLOWED_ORIGINS = ['https://onlineprofile613dee.netlify.app'];
 
-// CORS configuration
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || ALLOWED_ORIGINS.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.log('Origin not allowed:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+// Simplified CORS configuration
+app.use(cors({
+  origin: 'https://onlineprofile613dee.netlify.app',
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Cache-Control', 'Pragma'],
-  credentials: true,
-  optionsSuccessStatus: 200
-};
+  allowedHeaders: ['Content-Type'],
+  credentials: true
+}));
 
-app.use(cors(corsOptions));
+// Simple middleware to ensure CORS headers are always present
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://onlineprofile613dee.netlify.app');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
+
 app.use(express.json());
 
 // Store visitors in a JSON file
