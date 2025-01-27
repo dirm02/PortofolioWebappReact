@@ -1,65 +1,107 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+
 const app = express();
 
-// Enable CORS
-app.use(cors());
+// Load environment variables
+const PORT = process.env.PORT || 5000;
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS ? 
+  process.env.ALLOWED_ORIGINS.split(',') : 
+  ['http://localhost:3000', 'https://onlineprofile613dee.netlify.app'];
+
+// CORS configuration
+const corsOptions = {
+  origin: ALLOWED_ORIGINS,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
-// Path to store the visitors data
-const VISITORS_FILE = path.join(__dirname, 'visitors.json');
+// Store visitors in a JSON file
+const visitorsFile = path.join(__dirname, 'visitors.json');
 
-// Load existing visitors from file or initialize empty set
-let visitors = new Set();
+// Initialize visitors data
+let totalViews = 0;
+let visitors = new Map();
+
+// Load existing data
 try {
-  if (fs.existsSync(VISITORS_FILE)) {
-    const data = fs.readFileSync(VISITORS_FILE, 'utf8');
-    visitors = new Set(JSON.parse(data));
+  if (fs.existsSync(visitorsFile)) {
+    const data = JSON.parse(fs.readFileSync(visitorsFile));
+    totalViews = data.totalViews || 0;
+    visitors = new Map(Object.entries(data.visitors || {}));
   }
-} catch (error) {
-  console.error('Error loading visitors file:', error);
+} catch (err) {
+  console.error('Error reading visitors file:', err);
 }
 
 // Save visitors to file
-const saveVisitors = () => {
+function saveVisitors() {
   try {
-    fs.writeFileSync(VISITORS_FILE, JSON.stringify([...visitors]));
-  } catch (error) {
-    console.error('Error saving visitors file:', error);
+    const data = {
+      totalViews,
+      visitors: Object.fromEntries(visitors),
+      lastUpdated: new Date().toISOString()
+    };
+    fs.writeFileSync(visitorsFile, JSON.stringify(data, null, 2));
+  } catch (err) {
+    console.error('Error saving visitors:', err);
   }
-};
+}
 
-// Route to get current view count
+// Routes
 app.get('/api/views', (req, res) => {
-  res.json({ views: visitors.size });
+  res.json({ views: totalViews });
 });
 
-// Route to increment view count
 app.post('/api/views', (req, res) => {
-  const clientIP = req.headers['x-forwarded-for'] || 
-                  req.connection.remoteAddress || 
-                  req.socket.remoteAddress;
-                  
-  // Add IP if it's new
-  if (!visitors.has(clientIP)) {
-    visitors.add(clientIP);
-    saveVisitors(); // Save to file when we get a new visitor
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const now = Date.now();
+  
+  // If this IP hasn't been recorded before, increment total views
+  if (!visitors.has(ip)) {
+    totalViews++;
+    visitors.set(ip, {
+      firstVisit: now,
+      lastVisit: now,
+      visits: 1
+    });
+  } else {
+    const visitorData = visitors.get(ip);
+    visitorData.lastVisit = now;
+    visitorData.visits++;
+    visitors.set(ip, visitorData);
   }
   
-  res.json({ views: visitors.size });
+  saveVisitors();
+  res.json({ views: totalViews });
 });
 
-// Route to get current stats
 app.get('/api/stats', (req, res) => {
   res.json({
+    totalViews,
     uniqueVisitors: visitors.size,
-    lastUpdated: new Date().toISOString()
+    lastUpdated: new Date().toISOString(),
+    environment: NODE_ENV
   });
 });
 
-const PORT = process.env.PORT || 5000;
+// Health check endpoint
+app.get('/', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'Portfolio backend is running',
+    environment: NODE_ENV,
+    timestamp: new Date().toISOString()
+  });
+});
+
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server is running in ${NODE_ENV} mode on port ${PORT}`);
+  console.log('Allowed origins:', ALLOWED_ORIGINS);
 });
