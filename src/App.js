@@ -75,14 +75,23 @@ class App extends Component {
 
   incrementViewCount = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/views`, {
+      console.log('Attempting to increment view count');
+      console.log('Backend URL:', process.env.REACT_APP_BACKEND_URL);
+      
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/views`, {
         method: 'POST',
         headers: {
           'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
+          'Pragma': 'no-cache',
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
       });
+      
+      console.log('Response status:', response.status);
       const data = await response.json();
+      console.log('Response data:', data);
+      
       this.setState({ peepBasterds: data.views });
     } catch (error) {
       console.error('Error incrementing view count:', error);

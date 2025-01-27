@@ -57,15 +57,21 @@ function saveVisitors() {
 
 // Routes
 app.get('/api/views', (req, res) => {
+  console.log('GET /api/views called');
   res.json({ views: totalViews });
 });
 
 app.post('/api/views', (req, res) => {
+  console.log('POST /api/views called');
+  console.log('Client IP:', req.headers['x-forwarded-for'] || req.socket.remoteAddress);
+  console.log('Origin:', req.headers.origin);
+  
   const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
   const now = Date.now();
   
   // If this IP hasn't been recorded before, increment total views
   if (!visitors.has(ip)) {
+    console.log('New visitor detected');
     totalViews++;
     visitors.set(ip, {
       firstVisit: now,
@@ -73,6 +79,7 @@ app.post('/api/views', (req, res) => {
       visits: 1
     });
   } else {
+    console.log('Returning visitor detected');
     const visitorData = visitors.get(ip);
     visitorData.lastVisit = now;
     visitorData.visits++;
@@ -80,6 +87,7 @@ app.post('/api/views', (req, res) => {
   }
   
   saveVisitors();
+  console.log('Current total views:', totalViews);
   res.json({ views: totalViews });
 });
 
