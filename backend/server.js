@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const fetch = require('node-fetch');
 
 const app = express();
 
@@ -33,13 +34,47 @@ app.use(express.json());
 // Store visitors in a JSON file
 const visitorsFile = path.join(__dirname, 'visitors.json');
 
-// Initialize visitors data
-let totalViews = 0;
+// Store visitors in memory and persist to environment
+let totalViews = parseInt(process.env.TOTAL_VIEWS) || 0;
 let visitors = new Map();
+let isStarting = true;
+
+// Function to update environment variable
+async function updateEnvVar() {
+  if (process.env.RENDER_EXTERNAL_URL) {
+    console.log('Updating TOTAL_VIEWS environment variable:', totalViews);
+    // Note: In Render, you'll need to manually update this through the dashboard
+    // This log helps you know what value to set
+  }
+}
+
+// Startup health check
+async function checkHealth() {
+  try {
+    console.log('Performing startup health check...');
+    const response = await fetch(process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`);
+    if (response.ok) {
+      console.log('Server is healthy');
+      isStarting = false;
+    }
+  } catch (err) {
+    console.log('Server is still starting up...');
+  }
+}
+
+// Check health every 10 seconds during startup
+const healthCheckInterval = setInterval(() => {
+  if (!isStarting) {
+    clearInterval(healthCheckInterval);
+  } else {
+    checkHealth();
+  }
+}, 10000);
 
 // Load existing data
 try {
   console.log('=== Loading Visitor Data ===');
+  console.log('Initial total views from env:', totalViews);
   console.log('Visitors file path:', visitorsFile);
   
   if (fs.existsSync(visitorsFile)) {
@@ -53,11 +88,11 @@ try {
       lastUpdated: data.lastUpdated
     });
     
-    totalViews = data.totalViews || 0;
+    // Use the larger value between file and environment variable
+    totalViews = Math.max(totalViews, data.totalViews || 0);
     visitors = new Map(Object.entries(data.visitors || {}));
   } else {
-    console.log('No existing visitors file found, creating new data');
-    totalViews = 0;
+    console.log('No existing visitors file found, using env value:', totalViews);
     visitors = new Map();
     saveVisitors(); // Create initial file
   }
@@ -65,6 +100,7 @@ try {
   console.error('Error reading visitors file:', err);
   console.error('Stack:', err.stack);
   console.error('Current directory:', __dirname);
+  console.log('Falling back to env value:', totalViews);
 }
 
 // Save visitors to file
@@ -103,9 +139,17 @@ function saveVisitors() {
 // Routes
 app.get('/api/views', (req, res) => {
   console.log('=== GET /api/views called ===');
+  console.log('Server status:', isStarting ? 'starting up' : 'ready');
   console.log('Current total views:', totalViews);
   console.log('Number of unique visitors:', visitors.size);
-  res.json({ views: totalViews });
+  
+  // If server is still starting up, return cached value
+  if (isStarting) {
+    console.log('Server is still starting, returning environment value');
+    return res.json({ views: totalViews, status: 'warming_up' });
+  }
+  
+  res.json({ views: totalViews, status: 'ready' });
 });
 
 app.post('/api/views', (req, res) => {

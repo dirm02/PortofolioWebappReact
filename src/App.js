@@ -135,41 +135,73 @@ class App extends Component {
   };
 
   fetchCurrentCount = async () => {
-    try {
-      console.log('=== Fetching View Count ===');
-      console.log('Requesting current count from:', `${BACKEND_URL}/api/views`);
-      
-      const response = await fetch(`${BACKEND_URL}/api/views`, {
-        method: 'GET',
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
+    const maxRetries = 5; // Increased retries for warm-up period
+    let retryCount = 0;
+    
+    const tryFetch = async () => {
+      try {
+        console.log(`=== Fetching View Count (Attempt ${retryCount + 1}/${maxRetries}) ===`);
+        console.log('Requesting current count from:', `${BACKEND_URL}/api/views`);
+        
+        const response = await fetch(`${BACKEND_URL}/api/views`, {
+          method: 'GET',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        });
+        
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-      });
-      
-      console.log('Response status:', response.status);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const data = await response.json();
+        console.log('Received view count data:', data);
+        
+        if (data.status === 'warming_up') {
+          console.log('Server is warming up, will retry...');
+          if (retryCount < maxRetries - 1) {
+            retryCount++;
+            console.log(`Waiting 10 seconds for server warm-up... (${retryCount}/${maxRetries})`);
+            await new Promise(resolve => setTimeout(resolve, 10000));
+            return tryFetch();
+          }
+        }
+        
+        if (data.views === 0) {
+          console.warn('Warning: Received zero views from backend!');
+          console.log('Backend URL:', BACKEND_URL);
+          console.log('Current state:', this.state);
+          
+          // Try to fetch stats for more information
+          const statsResponse = await fetch(`${BACKEND_URL}/api/stats`);
+          if (statsResponse.ok) {
+            const statsData = await statsResponse.json();
+            console.log('Stats data:', statsData);
+          }
+        }
+        
+        this.setState({ peepBasterds: data.views });
+        console.log('View count updated in state:', data.views);
+      } catch (error) {
+        console.error(`=== View Counter Error (Attempt ${retryCount + 1}) ===`);
+        console.error('Error details:', error.message);
+        console.error('Stack:', error.stack);
+        console.error('Backend URL:', BACKEND_URL);
+        console.error('Current state:', this.state);
+        
+        if (retryCount < maxRetries - 1) {
+          retryCount++;
+          const delay = error.message.includes('Failed to fetch') ? 10000 : 2000;
+          console.log(`Retrying in ${delay/1000} seconds... (${retryCount}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return tryFetch();
+        }
       }
-      
-      const data = await response.json();
-      console.log('Received view count data:', data);
-      
-      if (data.views === 0) {
-        console.warn('Warning: Received zero views from backend!');
-        console.log('Backend URL:', BACKEND_URL);
-        console.log('Current state:', this.state);
-      }
-      
-      this.setState({ peepBasterds: data.views });
-      console.log('View count updated in state:', data.views);
-    } catch (error) {
-      console.error('=== View Counter Error ===');
-      console.error('Error details:', error.message);
-      console.error('Stack:', error.stack);
-      console.error('Backend URL:', BACKEND_URL);
-      console.error('Current state:', this.state);
-    }
+    };
+    
+    await tryFetch();
   };
 
   loadResumeFromPath(path) {
