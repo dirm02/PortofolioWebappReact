@@ -11,12 +11,13 @@ const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS ? 
   process.env.ALLOWED_ORIGINS.split(',') : 
-  ['http://localhost:3000', 'https://onlineprofile613dee.netlify.app'];
+  ['https://onlineprofile613dee.netlify.app'];
 
 // CORS configuration
 const corsOptions = {
   origin: ALLOWED_ORIGINS,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  credentials: true
 };
 
 app.use(cors(corsOptions));
