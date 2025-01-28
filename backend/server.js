@@ -21,43 +21,44 @@ app.use(cors({
 app.use(express.json());
 
 // Routes
-app.get('/api/views', (req, res) => {
-  console.log('=== GET /api/views called ===');
-  const totalViews = db.getTotalViewCount();
-  console.log('Current total views:', totalViews);
-  res.json({ views: totalViews });
+app.get('/api/views', async (req, res) => {
+  try {
+    const count = await db.getTotalViewCount();
+    res.json({ views: count });
+  } catch (err) {
+    console.error('Error getting view count:', err);
+    res.status(500).json({ error: 'Failed to get view count' });
+  }
 });
 
-app.post('/api/views', (req, res) => {
-  console.log('=== POST /api/views called ===');
-  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-  console.log('Client IP:', ip);
-  
-  const wasIncremented = db.recordVisit(ip);
-  const totalViews = db.getTotalViewCount();
-  
-  console.log('View count incremented:', wasIncremented);
-  console.log('Current total views:', totalViews);
-  
-  res.json({ views: totalViews });
+app.post('/api/views', async (req, res) => {
+  try {
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const incremented = await db.recordVisit(ip);
+    const count = await db.getTotalViewCount();
+    res.json({ views: count, incremented });
+  } catch (err) {
+    console.error('Error recording visit:', err);
+    res.status(500).json({ error: 'Failed to record visit' });
+  }
 });
 
-app.get('/api/stats', (req, res) => {
-  const stats = db.getStats();
-  res.json({
-    ...stats,
-    environment: NODE_ENV
-  });
+app.get('/api/stats', async (req, res) => {
+  try {
+    const stats = await db.getStats();
+    res.json({
+      ...stats,
+      environment: NODE_ENV
+    });
+  } catch (err) {
+    console.error('Error getting stats:', err);
+    res.status(500).json({ error: 'Failed to get stats' });
+  }
 });
 
 // Health check endpoint
-app.get('/', (req, res) => {
-  res.json({
-    status: 'ok',
-    message: 'Portfolio backend is running',
-    environment: NODE_ENV,
-    timestamp: new Date().toISOString()
-  });
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
 });
 
 app.listen(PORT, () => {
