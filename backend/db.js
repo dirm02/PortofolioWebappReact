@@ -2,76 +2,132 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
 
-// Backup file path
-const BACKUP_FILE = path.join(__dirname, 'visitors_backup.json');
+// Database and backup paths
+const DB_DIR = process.env.NODE_ENV === 'production' ? '/tmp' : __dirname;
+const DB_FILE = path.join(DB_DIR, 'visitors.db');
+const BACKUP_FILE = path.join(DB_DIR, 'visitors_backup.json');
 
-// Initialize database in memory
-const db = new sqlite3.Database(':memory:');
+console.log('Database path:', DB_FILE);
+console.log('Backup file path:', BACKUP_FILE);
+
+// Ensure database directory exists
+if (!fs.existsSync(DB_DIR)) {
+  fs.mkdirSync(DB_DIR, { recursive: true });
+}
+
+// Initialize file-based database
+console.log('Initializing SQLite database');
+const db = new sqlite3.Database(DB_FILE, (err) => {
+  if (err) {
+    console.error('Error opening database:', err);
+  } else {
+    console.log('Database initialized successfully');
+  }
+});
 
 // Promisify database operations
 const dbRun = (sql, params = []) => new Promise((resolve, reject) => {
+  console.log('Running SQL:', sql, 'with params:', params);
   db.run(sql, params, function(err) {
-    if (err) reject(err);
-    else resolve(this);
+    if (err) {
+      console.error('SQL Error:', err);
+      reject(err);
+    } else {
+      console.log('SQL Success - lastID:', this.lastID, 'changes:', this.changes);
+      resolve(this);
+    }
   });
 });
 
 const dbGet = (sql, params = []) => new Promise((resolve, reject) => {
+  console.log('Getting SQL:', sql, 'with params:', params);
   db.get(sql, params, (err, row) => {
-    if (err) reject(err);
-    else resolve(row);
+    if (err) {
+      console.error('SQL Error:', err);
+      reject(err);
+    } else {
+      console.log('SQL Result:', row);
+      resolve(row);
+    }
   });
 });
 
 const dbAll = (sql, params = []) => new Promise((resolve, reject) => {
+  console.log('Getting All SQL:', sql, 'with params:', params);
   db.all(sql, params, (err, rows) => {
-    if (err) reject(err);
-    else resolve(rows);
+    if (err) {
+      console.error('SQL Error:', err);
+      reject(err);
+    } else {
+      console.log('SQL Results count:', rows?.length);
+      resolve(rows);
+    }
   });
 });
 
 // Initialize tables
+console.log('Starting database initialization');
 db.serialize(() => {
+  console.log('Creating tables...');
   db.run(`CREATE TABLE visitors (
     ip TEXT PRIMARY KEY,
     first_visit INTEGER,
     last_visit INTEGER,
     visit_count INTEGER DEFAULT 1
-  )`);
+  )`, [], (err) => {
+    if (err) console.error('Error creating visitors table:', err);
+    else console.log('Visitors table created successfully');
+  });
 
   db.run(`CREATE TABLE stats (
     key TEXT PRIMARY KEY,
     value INTEGER
-  )`);
+  )`, [], (err) => {
+    if (err) console.error('Error creating stats table:', err);
+    else console.log('Stats table created successfully');
+  });
 
   // Load backup data if exists
   try {
     if (fs.existsSync(BACKUP_FILE)) {
-      console.log('Loading backup data...');
+      console.log('Found backup file, loading data...');
       const backup = JSON.parse(fs.readFileSync(BACKUP_FILE, 'utf8'));
+      console.log('Backup data:', backup);
       
       // Restore total views
-      db.run('INSERT INTO stats (key, value) VALUES (?, ?)', ['total_views', backup.totalViews || 0]);
+      db.run('INSERT INTO stats (key, value) VALUES (?, ?)', ['total_views', backup.totalViews || 0], (err) => {
+        if (err) console.error('Error restoring total views:', err);
+        else console.log('Total views restored:', backup.totalViews || 0);
+      });
       
       // Restore visitors
-      const stmt = db.prepare('INSERT INTO visitors (ip, first_visit, last_visit, visit_count) VALUES (?, ?, ?, ?)');
-      for (const [ip, data] of Object.entries(backup.visitors || {})) {
-        stmt.run(ip, data.first_visit, data.last_visit, data.visit_count);
+      if (backup.visitors && Object.keys(backup.visitors).length > 0) {
+        console.log('Restoring visitor records...');
+        const stmt = db.prepare('INSERT INTO visitors (ip, first_visit, last_visit, visit_count) VALUES (?, ?, ?, ?)');
+        for (const [ip, data] of Object.entries(backup.visitors)) {
+          stmt.run(ip, data.first_visit, data.last_visit, data.visit_count, (err) => {
+            if (err) console.error('Error restoring visitor:', ip, err);
+          });
+        }
+        stmt.finalize();
+        console.log('Visitor records restored');
       }
-      stmt.finalize();
       
-      console.log('Backup restored:', {
-        totalViews: backup.totalViews,
-        visitorCount: Object.keys(backup.visitors || {}).length
-      });
+      console.log('Backup restored successfully');
     } else {
-      // Initialize stats if no backup
-      db.run('INSERT INTO stats (key, value) VALUES (?, ?)', ['total_views', 0]);
+      console.log('No backup file found, initializing with zero counts');
+      db.run('INSERT INTO stats (key, value) VALUES (?, ?)', ['total_views', 0], (err) => {
+        if (err) console.error('Error initializing total views:', err);
+        else console.log('Total views initialized to 0');
+      });
     }
   } catch (err) {
-    console.error('Error loading backup:', err);
-    // Initialize stats if backup fails
-    db.run('INSERT INTO stats (key, value) VALUES (?, ?)', ['total_views', 0]);
+    console.error('Error during backup restore:', err);
+    console.error(err.stack);
+    db.run('INSERT INTO stats (key, value) VALUES (?, ?)', ['total_views', 0], (err) => {
+      if (err) console.error('Error initializing total views after failed restore:', err);
+      else console.log('Total views initialized to 0 after failed restore');
+    });
   }
 });
 

@@ -12,18 +12,21 @@ const ALLOWED_ORIGINS = ['https://onlineprofile613dee.netlify.app'];
 
 // CORS configuration
 app.use(cors({
-  origin: 'https://onlineprofile613dee.netlify.app',
+  origin: ALLOWED_ORIGINS[0],
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type'],
-  credentials: true
+  allowedHeaders: ['Content-Type', 'Cache-Control', 'Pragma'],
+  credentials: true,
+  optionsSuccessStatus: 200
 }));
 
 app.use(express.json());
 
 // Routes
 app.get('/api/views', async (req, res) => {
+  console.log('GET /api/views called');
   try {
     const count = await db.getTotalViewCount();
+    console.log('Current view count:', count);
     res.json({ views: count });
   } catch (err) {
     console.error('Error getting view count:', err);
@@ -32,33 +35,49 @@ app.get('/api/views', async (req, res) => {
 });
 
 app.post('/api/views', async (req, res) => {
+  console.log('POST /api/views called');
   try {
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    console.log('Visitor IP:', ip);
+    
     const incremented = await db.recordVisit(ip);
+    console.log('Visit recorded, incremented:', incremented);
+    
     const count = await db.getTotalViewCount();
+    console.log('New view count:', count);
+    
     res.json({ views: count, incremented });
   } catch (err) {
     console.error('Error recording visit:', err);
+    console.error(err.stack); // Log the full error stack
     res.status(500).json({ error: 'Failed to record visit' });
   }
 });
 
 app.get('/api/stats', async (req, res) => {
+  console.log('GET /api/stats called');
   try {
     const stats = await db.getStats();
+    console.log('Current stats:', stats);
     res.json({
       ...stats,
       environment: NODE_ENV
     });
   } catch (err) {
     console.error('Error getting stats:', err);
+    console.error(err.stack); // Log the full error stack
     res.status(500).json({ error: 'Failed to get stats' });
   }
 });
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+  console.log('Health check called');
+  res.json({ 
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    environment: NODE_ENV
+  });
 });
 
 app.listen(PORT, () => {
