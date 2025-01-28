@@ -47,7 +47,7 @@ async function initializeDatabase() {
     `);
 
     // Initialize total_views if it doesn't exist
-    const statsResult = await client.query(
+    await client.query(
       'INSERT INTO stats (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING',
       ['total_views', 0]
     );
@@ -61,7 +61,7 @@ async function initializeDatabase() {
   }
 }
 
-// Initialize the database when the module loads
+// Initialize the database when the module is imported
 initializeDatabase().catch(console.error);
 
 // Promisify database operations
@@ -322,5 +322,6 @@ process.on('SIGTERM', async () => {
 module.exports = {
   recordVisit,
   getStats,
-  getTotalViewCount
+  getTotalViewCount,
+  initializeDatabase // Export this so we can ensure database is ready
 }; 

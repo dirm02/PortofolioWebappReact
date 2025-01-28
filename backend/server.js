@@ -49,7 +49,7 @@ app.post('/api/views', async (req, res) => {
     res.json({ views: count, incremented });
   } catch (err) {
     console.error('Error recording visit:', err);
-    console.error(err.stack); // Log the full error stack
+    console.error(err.stack);
     res.status(500).json({ error: 'Failed to record visit' });
   }
 });
@@ -65,7 +65,7 @@ app.get('/api/stats', async (req, res) => {
     });
   } catch (err) {
     console.error('Error getting stats:', err);
-    console.error(err.stack); // Log the full error stack
+    console.error(err.stack);
     res.status(500).json({ error: 'Failed to get stats' });
   }
 });
@@ -80,7 +80,18 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running in ${NODE_ENV} mode on port ${PORT}`);
-  console.log('Allowed origins:', ALLOWED_ORIGINS);
-});
+// Start server after database is initialized
+async function startServer() {
+  try {
+    await db.initializeDatabase();
+    app.listen(PORT, () => {
+      console.log(`Server is running in ${NODE_ENV} mode on port ${PORT}`);
+      console.log('Allowed origins:', ALLOWED_ORIGINS);
+    });
+  } catch (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  }
+}
+
+startServer();
