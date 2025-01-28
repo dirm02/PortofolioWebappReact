@@ -21,7 +21,7 @@ class Footer extends Component {
             <div className="col social-links">
               {networks}
               <div className="footer-view-counter">
-                <span role="img" aria-label="eyes">👀</span> *: {this.props.peepBasterds || 0}
+                <span role="img" aria-label="eyes">👀</span> {this.props.peepBasterds || 0}
               </div>
             </div>
             <div className="row">
