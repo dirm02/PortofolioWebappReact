@@ -37,7 +37,7 @@ app.get('/api/views', async (req, res) => {
 app.post('/api/views', async (req, res) => {
   console.log('POST /api/views called');
   try {
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
     console.log('Visitor IP:', ip);
     
     const incremented = await db.recordVisit(ip);
@@ -81,17 +81,18 @@ app.get('/health', (req, res) => {
 });
 
 // Start server after database is initialized
-async function startServer() {
-  try {
-    await db.initializeDatabase();
-    app.listen(PORT, () => {
-      console.log(`Server is running in ${NODE_ENV} mode on port ${PORT}`);
-      console.log('Allowed origins:', ALLOWED_ORIGINS);
+function startServer() {
+  db.initializeDatabase()
+    .then(() => {
+      app.listen(PORT, () => {
+        console.log(`Server is running in ${NODE_ENV} mode on port ${PORT}`);
+        console.log('Allowed origins:', ALLOWED_ORIGINS);
+      });
+    })
+    .catch(err => {
+      console.error('Failed to start server:', err);
+      process.exit(1);
     });
-  } catch (err) {
-    console.error('Failed to start server:', err);
-    process.exit(1);
-  }
 }
 
 startServer();

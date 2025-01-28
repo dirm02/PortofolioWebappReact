@@ -289,33 +289,12 @@ async function getTotalViewCount() {
 }
 
 // Handle process termination
-process.on('SIGTERM', async () => {
-  console.log('Received SIGTERM, saving final backup...');
-  try {
-    const stats = await getStats();
-    const rows = await dbAll('SELECT * FROM visitors');
-    const visitors = {};
-    
-    for (const row of rows) {
-      visitors[row.ip] = {
-        first_visit: row.first_visit,
-        last_visit: row.last_visit,
-        visit_count: row.visit_count
-      };
-    }
-    
-    const backup = {
-      totalViews: stats.totalViews,
-      visitors,
-      lastUpdated: new Date().toISOString()
-    };
-    
-    fs.writeFileSync(BACKUP_FILE, JSON.stringify(backup, null, 2));
-    console.log('Final backup saved');
-  } catch (err) {
-    console.error('Error saving final backup:', err);
-  }
-  process.exit(0);
+process.on('SIGTERM', () => {
+  console.log('Received SIGTERM signal');
+  pool.end(() => {
+    console.log('Database pool closed');
+    process.exit(0);
+  });
 });
 
 // Export functions
@@ -323,5 +302,5 @@ module.exports = {
   recordVisit,
   getStats,
   getTotalViewCount,
-  initializeDatabase // Export this so we can ensure database is ready
+  initializeDatabase
 }; 
