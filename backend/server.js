@@ -10,6 +10,18 @@ const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const ALLOWED_ORIGINS = ['https://onlineprofile613dee.netlify.app'];
 
+// Verify required environment variables
+if (!process.env.DATABASE_URL) {
+  console.error('DATABASE_URL environment variable is required');
+  process.exit(1);
+}
+
+console.log('Environment:', {
+  NODE_ENV,
+  PORT,
+  DATABASE_URL: process.env.DATABASE_URL ? 'Present' : 'Missing'
+});
+
 // CORS configuration
 app.use(cors({
   origin: ALLOWED_ORIGINS[0],
@@ -81,18 +93,32 @@ app.get('/health', (req, res) => {
 });
 
 // Start server after database is initialized
-function startServer() {
-  initializeDatabase()
-    .then(() => {
-      app.listen(PORT, () => {
-        console.log(`Server is running in ${NODE_ENV} mode on port ${PORT}`);
-        console.log('Allowed origins:', ALLOWED_ORIGINS);
-      });
-    })
-    .catch(err => {
-      console.error('Failed to start server:', err);
-      process.exit(1);
+async function startServer() {
+  try {
+    console.log('Initializing database...');
+    await initializeDatabase();
+    console.log('Database initialized successfully');
+
+    app.listen(PORT, () => {
+      console.log(`Server is running in ${NODE_ENV} mode on port ${PORT}`);
+      console.log('Allowed origins:', ALLOWED_ORIGINS);
     });
+  } catch (err) {
+    console.error('Failed to start server:', err);
+    console.error('Stack trace:', err.stack);
+    process.exit(1);
+  }
 }
+
+// Handle uncaught errors
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled rejection:', err);
+  process.exit(1);
+});
 
 startServer();

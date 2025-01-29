@@ -1,13 +1,21 @@
 import pg from 'pg';
 const { Pool } = pg;
 
-// Create a new pool using the DATABASE_URL environment variable
-const pool = new Pool({
+// Log database configuration (without sensitive info)
+const dbConfig = {
   connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false // Required for Render's PostgreSQL
+    rejectUnauthorized: false
   }
+};
+
+console.log('Database config:', {
+  ...dbConfig,
+  connectionString: process.env.DATABASE_URL ? 'Present' : 'Missing'
 });
+
+// Create a new pool using the DATABASE_URL environment variable
+const pool = new Pool(dbConfig);
 
 // Test database connection
 pool.on('connect', () => {
@@ -21,10 +29,11 @@ pool.on('error', (err) => {
 
 // Initialize database
 async function initializeDatabase() {
-  const client = await pool.connect();
+  let client;
   try {
-    console.log('Initializing PostgreSQL database...');
-    console.log('Database URL:', process.env.DATABASE_URL ? 'Present' : 'Missing');
+    console.log('Attempting to connect to PostgreSQL...');
+    client = await pool.connect();
+    console.log('Connected successfully, initializing database...');
 
     // Create tables
     await client.query(`
@@ -62,9 +71,15 @@ async function initializeDatabase() {
   } catch (err) {
     console.error('Error initializing database:', err);
     console.error('Stack trace:', err.stack);
+    console.error('Connection details:', {
+      host: new URL(process.env.DATABASE_URL || '').hostname || 'Not available',
+      database: new URL(process.env.DATABASE_URL || '').pathname?.slice(1) || 'Not available'
+    });
     throw err;
   } finally {
-    client.release();
+    if (client) {
+      client.release();
+    }
   }
 }
 
