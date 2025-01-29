@@ -1,7 +1,7 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const db = require('./db');
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import { recordVisit, getStats, getTotalViewCount, initializeDatabase } from './db.js';
 
 const app = express();
 
@@ -25,7 +25,7 @@ app.use(express.json());
 app.get('/api/views', async (req, res) => {
   console.log('GET /api/views called');
   try {
-    const count = await db.getTotalViewCount();
+    const count = await getTotalViewCount();
     console.log('Current view count:', count);
     res.json({ views: count });
   } catch (err) {
@@ -40,10 +40,10 @@ app.post('/api/views', async (req, res) => {
     const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
     console.log('Visitor IP:', ip);
     
-    const incremented = await db.recordVisit(ip);
+    const incremented = await recordVisit(ip);
     console.log('Visit recorded, incremented:', incremented);
     
-    const count = await db.getTotalViewCount();
+    const count = await getTotalViewCount();
     console.log('New view count:', count);
     
     res.json({ views: count, incremented });
@@ -57,7 +57,7 @@ app.post('/api/views', async (req, res) => {
 app.get('/api/stats', async (req, res) => {
   console.log('GET /api/stats called');
   try {
-    const stats = await db.getStats();
+    const stats = await getStats();
     console.log('Current stats:', stats);
     res.json({
       ...stats,
@@ -82,7 +82,7 @@ app.get('/health', (req, res) => {
 
 // Start server after database is initialized
 function startServer() {
-  db.initializeDatabase()
+  initializeDatabase()
     .then(() => {
       app.listen(PORT, () => {
         console.log(`Server is running in ${NODE_ENV} mode on port ${PORT}`);

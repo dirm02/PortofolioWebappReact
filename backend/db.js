@@ -1,4 +1,5 @@
-const { Pool } = require('pg');
+import pg from 'pg';
+const { Pool } = pg;
 const path = require('path');
 const fs = require('fs');
 
@@ -298,7 +299,7 @@ process.on('SIGTERM', () => {
 });
 
 // Export functions
-module.exports = {
+export {
   recordVisit,
   getStats,
   getTotalViewCount,
