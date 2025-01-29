@@ -1,20 +1,5 @@
 import pg from 'pg';
 const { Pool } = pg;
-const path = require('path');
-const fs = require('fs');
-
-// Database and backup paths
-const DB_DIR = process.env.NODE_ENV === 'production' ? '/tmp' : __dirname;
-const DB_FILE = path.join(DB_DIR, 'visitors.db');
-const BACKUP_FILE = path.join(DB_DIR, 'visitors_backup.json');
-
-console.log('Database path:', DB_FILE);
-console.log('Backup file path:', BACKUP_FILE);
-
-// Ensure database directory exists
-if (!fs.existsSync(DB_DIR)) {
-  fs.mkdirSync(DB_DIR, { recursive: true });
-}
 
 // Create a new pool using the DATABASE_URL environment variable
 const pool = new Pool({
@@ -24,11 +9,22 @@ const pool = new Pool({
   }
 });
 
+// Test database connection
+pool.on('connect', () => {
+  console.log('PostgreSQL connection established');
+});
+
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle PostgreSQL client', err);
+  process.exit(-1);
+});
+
 // Initialize database
 async function initializeDatabase() {
   const client = await pool.connect();
   try {
     console.log('Initializing PostgreSQL database...');
+    console.log('Database URL:', process.env.DATABASE_URL ? 'Present' : 'Missing');
 
     // Create tables
     await client.query(`
@@ -39,6 +35,7 @@ async function initializeDatabase() {
         visit_count INTEGER DEFAULT 1
       )
     `);
+    console.log('Visitors table ready');
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS stats (
@@ -46,151 +43,30 @@ async function initializeDatabase() {
         value INTEGER
       )
     `);
+    console.log('Stats table ready');
 
     // Initialize total_views if it doesn't exist
-    await client.query(
-      'INSERT INTO stats (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING',
+    const result = await client.query(
+      'INSERT INTO stats (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING RETURNING value',
       ['total_views', 0]
     );
+    
+    if (result.rowCount > 0) {
+      console.log('Initialized total_views with 0');
+    } else {
+      const current = await client.query('SELECT value FROM stats WHERE key = $1', ['total_views']);
+      console.log('Current total_views:', current.rows[0]?.value || 0);
+    }
 
     console.log('Database initialized successfully');
   } catch (err) {
     console.error('Error initializing database:', err);
+    console.error('Stack trace:', err.stack);
     throw err;
   } finally {
     client.release();
   }
 }
-
-// Initialize the database when the module is imported
-initializeDatabase().catch(console.error);
-
-// Promisify database operations
-const dbRun = (sql, params = []) => new Promise((resolve, reject) => {
-  console.log('Running SQL:', sql, 'with params:', params);
-  pool.query(sql, params, (err, result) => {
-    if (err) {
-      console.error('SQL Error:', err);
-      reject(err);
-    } else {
-      console.log('SQL Success - lastID:', result.rows[0]?.lastID, 'changes:', result.rows[0]?.rowCount);
-      resolve(result.rows[0]);
-    }
-  });
-});
-
-const dbGet = (sql, params = []) => new Promise((resolve, reject) => {
-  console.log('Getting SQL:', sql, 'with params:', params);
-  pool.query(sql, params, (err, result) => {
-    if (err) {
-      console.error('SQL Error:', err);
-      reject(err);
-    } else {
-      console.log('SQL Result:', result.rows[0]);
-      resolve(result.rows[0]);
-    }
-  });
-});
-
-const dbAll = (sql, params = []) => new Promise((resolve, reject) => {
-  console.log('Getting All SQL:', sql, 'with params:', params);
-  pool.query(sql, params, (err, result) => {
-    if (err) {
-      console.error('SQL Error:', err);
-      reject(err);
-    } else {
-      console.log('SQL Results count:', result.rows?.length);
-      resolve(result.rows);
-    }
-  });
-});
-
-// Initialize tables
-console.log('Starting database initialization');
-pool.query(`
-  CREATE TABLE IF NOT EXISTS visitors (
-    ip TEXT PRIMARY KEY,
-    first_visit BIGINT,
-    last_visit BIGINT,
-    visit_count INTEGER DEFAULT 1
-  )
-`);
-
-pool.query(`
-  CREATE TABLE IF NOT EXISTS stats (
-    key TEXT PRIMARY KEY,
-    value INTEGER
-  )
-`);
-
-// Load backup data if exists
-try {
-  if (fs.existsSync(BACKUP_FILE)) {
-    console.log('Found backup file, loading data...');
-    const backup = JSON.parse(fs.readFileSync(BACKUP_FILE, 'utf8'));
-    console.log('Backup data:', backup);
-    
-    // Restore total views
-    await dbRun('UPDATE stats SET value = $1 WHERE key = $2', [backup.totalViews || 0, 'total_views']);
-    
-    // Restore visitors
-    if (backup.visitors && Object.keys(backup.visitors).length > 0) {
-      console.log('Restoring visitor records...');
-      const stmt = await pool.query('INSERT INTO visitors (ip, first_visit, last_visit, visit_count) VALUES ($1, $2, $3, $4)');
-      for (const [ip, data] of Object.entries(backup.visitors)) {
-        stmt.rows.push(await dbRun('INSERT INTO visitors (ip, first_visit, last_visit, visit_count) VALUES ($1, $2, $3, $4)', [ip, data.first_visit, data.last_visit, data.visit_count]));
-      }
-      console.log('Visitor records restored');
-    }
-    
-    console.log('Backup restored successfully');
-  } else {
-    console.log('No backup file found, initializing with zero counts');
-    await dbRun('UPDATE stats SET value = $1 WHERE key = $2', [0, 'total_views']);
-  }
-} catch (err) {
-  console.error('Error during backup restore:', err);
-  console.error(err.stack);
-  await dbRun('UPDATE stats SET value = $1 WHERE key = $2', [0, 'total_views']);
-}
-
-// Save backup every 5 minutes
-setInterval(async () => {
-  try {
-    const stats = await dbGet(`
-      SELECT 
-        (SELECT value FROM stats WHERE key = 'total_views') as total_views,
-        COUNT(*) as unique_visitors,
-        MAX(last_visit) as last_visit
-      FROM visitors
-    `);
-    
-    const rows = await dbAll('SELECT * FROM visitors');
-    const visitors = {};
-    
-    for (const row of rows) {
-      visitors[row.ip] = {
-        first_visit: row.first_visit,
-        last_visit: row.last_visit,
-        visit_count: row.visit_count
-      };
-    }
-    
-    const backup = {
-      totalViews: stats.total_views || 0,
-      visitors,
-      lastUpdated: new Date().toISOString()
-    };
-    
-    fs.writeFileSync(BACKUP_FILE, JSON.stringify(backup, null, 2));
-    console.log('Backup saved:', {
-      totalViews: backup.totalViews,
-      visitorCount: Object.keys(visitors).length
-    });
-  } catch (err) {
-    console.error('Error saving backup:', err);
-  }
-}, 5 * 60 * 1000);
 
 async function recordVisit(ip) {
   const client = await pool.connect();
@@ -218,6 +94,7 @@ async function recordVisit(ip) {
         ['total_views']
       );
       incremented = true;
+      console.log('New visitor recorded:', { ip, timestamp: new Date(now).toISOString() });
     } else {
       const visitor = visitorResult.rows[0];
       const hoursSinceLastVisit = (now - parseInt(visitor.last_visit)) / (1000 * 60 * 60);
@@ -233,6 +110,9 @@ async function recordVisit(ip) {
           ['total_views']
         );
         incremented = true;
+        console.log('Returning visitor updated:', { ip, hoursSinceLastVisit: Math.floor(hoursSinceLastVisit) });
+      } else {
+        console.log('Recent visitor, not counting:', { ip, hoursSinceLastVisit: Math.floor(hoursSinceLastVisit) });
       }
     }
 
@@ -242,6 +122,7 @@ async function recordVisit(ip) {
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Error recording visit:', err);
+    console.error('Stack trace:', err.stack);
     throw err;
   } finally {
     client.release();
@@ -260,13 +141,16 @@ async function getStats() {
     `);
     
     const stats = result.rows[0];
-    return {
+    const response = {
       totalViews: parseInt(stats.total_views) || 0,
       uniqueVisitors: parseInt(stats.unique_visitors) || 0,
       lastVisit: stats.last_visit ? new Date(parseInt(stats.last_visit)).toISOString() : null
     };
+    console.log('Current stats:', response);
+    return response;
   } catch (err) {
     console.error('Error getting stats:', err);
+    console.error('Stack trace:', err.stack);
     throw err;
   } finally {
     client.release();
@@ -280,9 +164,12 @@ async function getTotalViewCount() {
       'SELECT value FROM stats WHERE key = $1',
       ['total_views']
     );
-    return result.rows[0]?.value || 0;
+    const count = result.rows[0]?.value || 0;
+    console.log('Current total views:', count);
+    return count;
   } catch (err) {
     console.error('Error getting total view count:', err);
+    console.error('Stack trace:', err.stack);
     throw err;
   } finally {
     client.release();
