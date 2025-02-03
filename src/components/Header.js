@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import Typical from "react-typical";
 import Switch from "react-switch";
+import PropTypes from "prop-types";
 
 class Header extends Component {
   titles = [];
@@ -34,6 +35,8 @@ class Header extends Component {
       return <Typical className="title-styles" steps={this.titles} loop={50} />
     }, (props, prevProp) => true);
 
+    const { applyPickedLanguage } = this.props;
+
     return (
       <header id="home" style={{ height: window.innerHeight - 140, display: 'block' }}>
         <div className="row aligner" style={{height: '100%'}}>
@@ -46,6 +49,22 @@ class Header extends Component {
               </h1>
               <div className="title-container">
                 <HeaderTitleTypeAnimation />
+              </div>
+              <div className="language-icons" style={{ position: 'absolute', right: '140px', top: '20px' }}>
+                <img
+                  id={window.$primaryLanguageIconId}
+                  src="/images/ca-flag.svg"
+                  alt="English"
+                  onClick={() => this.props.applyPickedLanguage(window.$primaryLanguage)}
+                  style={{ width: '40px', cursor: 'pointer', marginRight: '10px' }}
+                />
+                <img
+                  id={window.$secondaryLanguageIconId}
+                  src="/images/fr-flag.svg"
+                  alt="Français"
+                  onClick={() => this.props.applyPickedLanguage(window.$secondaryLanguage)}
+                  style={{ width: '40px', cursor: 'pointer' }}
+                />
               </div>
               <Switch
                 checked={this.state.checked}
@@ -94,5 +113,10 @@ class Header extends Component {
     );
   }
 }
+
+Header.propTypes = {
+  applyPickedLanguage: PropTypes.func.isRequired,
+  sharedData: PropTypes.object.isRequired
+};
 
 export default Header;

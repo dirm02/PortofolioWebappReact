@@ -1,12 +1,12 @@
 import React, { Component } from "react";
 import $ from "jquery";
 import "./App.scss";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import About from "./components/About";
-import Experience from "./components/Experience";
-import Projects from "./components/Projects";
-import Skills from "./components/Skills";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
+import Portfolio from "./pages/Portfolio";
+import Products from "./pages/Products";
+import Services from "./pages/Services";
 
 // Define language variables globally
 window.$primaryLanguage = 'en';
@@ -43,20 +43,27 @@ class App extends Component {
       oppositeLangIconId === window.$primaryLanguageIconId
         ? window.$secondaryLanguageIconId
         : window.$primaryLanguageIconId;
-        
+
     const oppositeElem = document.getElementById(oppositeLangIconId);
     const pickedElem = document.getElementById(pickedLangIconId);
-    
+
+    // Dim the OPPOSITE language flag (the one not selected)
     if (oppositeElem) {
-      oppositeElem.removeAttribute("filter", "brightness(40%)");
+      oppositeElem.setAttribute("filter", "brightness(40%)");
     }
+    // Clear the SELECTED language flag
     if (pickedElem) {
-      pickedElem.setAttribute("filter", "brightness(40%)");
+      pickedElem.removeAttribute("filter");
     }
   };
 
   componentDidMount() {
     this.loadSharedData();
+    // Add null check for DOM element
+    const secondaryLangElem = document.getElementById(window.$secondaryLanguageIconId);
+    if (secondaryLangElem) {
+      secondaryLangElem.setAttribute("filter", "brightness(40%)");
+    }
     this.applyPickedLanguage(
       window.$primaryLanguage,
       window.$secondaryLanguageIconId
@@ -124,63 +131,32 @@ class App extends Component {
   render() {
     const { peepBasterds } = this.state;
     return (
-      <div>
-        <Header sharedData={this.state.sharedData.basic_info} />
-        <div className="col-md-12 mx-auto text-center language">
-          <div
-            onClick={() =>
-              this.applyPickedLanguage(
-                window.$primaryLanguage,
-                window.$secondaryLanguageIconId
-              )
-            }
-            style={{ display: "inline" }}
-          >
-            <span
-              className="iconify language-icon mr-5"
-              data-icon="twemoji-flag-for-flag-united-kingdom"
-              data-inline="false"
-              id={window.$primaryLanguageIconId}
-            ></span>
-          </div>
-          <div
-            onClick={() =>
-              this.applyPickedLanguage(
-                window.$secondaryLanguage,
-                window.$primaryLanguageIconId
-              )
-            }
-            style={{ display: "inline" }}
-          >
-            <span
-              className="iconify language-icon"
-              data-icon="twemoji-flag-for-flag-france"
-              data-inline="false"
-              id={window.$secondaryLanguageIconId}
-            ></span>
-          </div>
-        </div>
-        <About
-          resumeBasicInfo={this.state.resumeData.basic_info}
-          sharedBasicInfo={this.state.sharedData.basic_info}
-        />
-        <Projects
-          resumeProjects={this.state.resumeData.projects}
-          resumeBasicInfo={this.state.resumeData.basic_info}
-        />
-        <Skills
-          sharedSkills={this.state.sharedData.skills}
-          resumeBasicInfo={this.state.resumeData.basic_info}
-        />
-        <Experience
-          resumeExperience={this.state.resumeData.experience}
-          resumeBasicInfo={this.state.resumeData.basic_info}
-        />
-        <Footer 
-          sharedBasicInfo={this.state.sharedData.basic_info}
-          peepBasterds={peepBasterds}
-        />
-      </div>
+      <Router>
+        <Navbar />
+        <main>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/services" element={<Services />} />
+            <Route
+              path="/portfolio"
+              element={
+                <Portfolio
+                  applyPickedLanguage={this.applyPickedLanguage}
+                  sharedData={this.state.sharedData}
+                  sharedBasicInfo={this.state.sharedData.basic_info}
+                  resumeBasicInfo={this.state.resumeData.basic_info}
+                  resumeProjects={this.state.resumeData.projects}
+                  resumeExperience={this.state.resumeData.experience}
+                  sharedSkills={this.state.sharedData.skills}
+                  peepBasterds={peepBasterds}
+                />
+              }
+            />
+            
+          </Routes>
+        </main>
+      </Router>
     );
   }
 }

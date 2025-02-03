@@ -1,3 +1,4 @@
+@import "~bootstrap/scss/bootstrap";
 @import './scss/themes/theme-dark.scss';
 @import './scss/themes/theme-light.scss';
 @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@200;300&display=swap');
@@ -469,5 +470,75 @@ footer a:focus {
 	
 	span[role="img"] {
 		margin-right: 8px;
+	}
+}
+
+.navbar {
+	position: fixed !important;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 1030;
+	min-height: 98px;
+	box-shadow: 0 2px 4px rgba(40, 230, 173, 0.1);
+	transition: top 0.3s ease-in-out;
+	
+	.navbar-brand {
+		font-size: 1.8rem;
+		padding-left: 1rem;
+	}
+	
+	.nav-link {
+		font-size: 2.1rem;
+		padding: 0.8rem 1.2rem !important;
+	}
+}
+
+.navbar.navbar-hidden {
+	top: -120px;
+}
+
+body {
+	padding-top: 98px !important;
+}
+
+main {
+	margin-top: 98px;
+}
+
+.language-switch {
+	position: absolute;
+	right: 20px;
+	top: 20px;
+	display: flex;
+	align-items: center;
+	
+	img {
+		transition: transform 0.3s ease;
+		
+		&:hover {
+			transform: scale(1.1);
+		}
+		
+		&[filter] {
+			filter: brightness(40%);
+		}
+	}
+}
+
+.language-icons {
+	display: flex;
+	align-items: center;
+	
+	img {
+		transition: transform 0.3s ease;
+		
+		&:hover {
+			transform: scale(1.1);
+		}
+		
+		&[filter] {
+			filter: brightness(40%);
+		}
 	}
 }
