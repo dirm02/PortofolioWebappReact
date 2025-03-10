@@ -15,8 +15,7 @@ window.$primaryLanguageIconId = 'primary-lang-icon';
 window.$secondaryLanguageIconId = 'secondary-lang-icon';
 
 // Backend URL configuration
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://portofoliowebappreact-backend.onrender.com';
-
+const BACKEND_URL =  'http://24.156.182.222:5000';
 // Cookie helper functions
 const setCookie = (name, value, days) => {
   const date = new Date();
