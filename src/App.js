@@ -15,7 +15,7 @@ window.$primaryLanguageIconId = 'primary-lang-icon';
 window.$secondaryLanguageIconId = 'secondary-lang-icon';
 
 // Backend URL configuration
-const BACKEND_URL =  'http://24.156.182.222:5000';
+const BACKEND_URL =  '';
 // Cookie helper functions
 const setCookie = (name, value, days) => {
   const date = new Date();
