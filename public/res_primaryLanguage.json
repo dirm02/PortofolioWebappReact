@@ -37,13 +37,13 @@
         ]
       },
       {
-        "title": "Flight Tracker",
-        "startDate": "2024",
-        "description": "Flight Tracker is a web application that allows users to track flights and view details about each flight. The app was built using HTML CSS and a call for API.",
+        "title": "Bus Tracker",
+        "startDate": "2025",
+        "description": "Proficient Angular and TypeScript developer with hands-on experience building dynamic web applications. Demonstrated ability to leverage APIs and implement real-time data visualization through the creation of a bus tracking website. Skilled in developing responsive and user-friendly interfaces, managing application state, and ensuring efficient data handling within the Angular framework. Adept at utilizing TypeScript for robust and maintainable code.",
         "images": [
-          "images/portfolio/Project2/FlightTrackProj.png"
+          "images/portfolio/Project2/RadarQuest.png"
         ],
-        "url": "https://github.com/dirm02/FlightTracker.git",
+        "url": "http://24.156.182.222:10035",
         "technologies": [
           {
             "class": "devicon-react-original",
@@ -64,44 +64,40 @@
         ]
       },
       {
-        "title": "Angular FastAPI  Python",
-        "startDate": "Jul.2024",
-        "description": "One of many app I was previledge to work on. I was responsible for developing a course explorer app that allows users to search for courses and view details about each course. The app was built using FastAPI for the backend and Angular for the frontend.",
+        "title": "SharePoint Web Part Expert",
+        "startDate": "2025",
+        "description": "Aspiring SPFx developer with a solid understanding of TypeScript, React, and the SharePoint Framework. Demonstrated ability to build custom web parts and extensions through personal projects and training. Eager to apply my knowledge and contribute to a team focused on developing innovative solutions for SharePoint Online. Quick learner with a passion for modern web technologies and Microsoft 365.",
         "images": [
-          "images/portfolio/Project3/AngularProj.png"
+          "images/portfolio/Project3/SPFx.png"
         ],
-        "url": "https://github.com/dirm02/course_explorer-fastapi_angular-",
+        "url": "https://github.com/dirm02",
         "technologies": [
-          {
-            "class": "devicon-angularjs-plain",
-            "name": "Angular"
-          },
+          
           {
             "class": "devicon-typescript-plain",
             "name": "TypeScript"
           },
           {
-            "class": "devicon-api-plain",
-            "name": "FastAPI"
+            "class": "devicon-react-original",
+            "name": "React"
           }
         ]
       }
     ],
     "experience": [
       {
-        "company": "Outlier",
-        "title": "Training AI how to Code",
-        "years": "Dec.2024 - present",
+        "company": "Compucom",
+        "title": "Shopping Scale Programmer",
+        "years": "Jan.2025 - present",
         "mainTech": [
           "Developer"
         ],
         "technologies": [
-        "OpenAI",
-        "ChatGPT",
-        "Claude",
-        "Mistral",          
-        "Gemini",
-        "Gemini Pro"
+        "TCP/IP",
+        "SharePoint",
+        "Knowledge Base",
+        "Windows Server/Windows 11"       
+        
         ]
       },
       {

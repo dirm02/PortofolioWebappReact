@@ -8,23 +8,25 @@ const app = express();
 // Load environment variables
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
-const ALLOWED_ORIGINS = ['https://onlineprofile613dee.netlify.app'];
+const ALLOWED_ORIGINS = ['https://onlineprofile613dee.netlify.app', 'http://localhost:3000'];
 
-// Verify required environment variables
-if (!process.env.DATABASE_URL) {
-  console.error('DATABASE_URL environment variable is required');
-  process.exit(1);
-}
-
+// Log environment information
 console.log('Environment:', {
   NODE_ENV,
-  PORT,
-  DATABASE_URL: process.env.DATABASE_URL ? 'Present' : 'Missing'
+  PORT
 });
 
 // CORS configuration
 app.use(cors({
-  origin: ALLOWED_ORIGINS[0],
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if(!origin) return callback(null, true);
+    if(ALLOWED_ORIGINS.indexOf(origin) === -1) {
+      var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Cache-Control', 'Pragma'],
   credentials: true,

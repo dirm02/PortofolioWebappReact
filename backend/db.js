@@ -1,209 +1,191 @@
-import pg from 'pg';
-const { Pool } = pg;
+import sqlite3 from 'sqlite3';
+import { promisify } from 'util';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Log database configuration (without sensitive info)
-const dbConfig = {
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
-};
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-console.log('Database config:', {
-  ...dbConfig,
-  connectionString: process.env.DATABASE_URL ? 'Present' : 'Missing'
-});
+// Create SQLite database file in the backend directory
+const dbPath = path.join(__dirname, 'portfolio.sqlite');
+console.log(`Using SQLite database at: ${dbPath}`);
 
-// Create a new pool using the DATABASE_URL environment variable
-const pool = new Pool(dbConfig);
+// Initialize SQLite database
+const db = new sqlite3.Database(dbPath);
 
-// Test database connection
-pool.on('connect', () => {
-  console.log('PostgreSQL connection established');
-});
-
-pool.on('error', (err) => {
-  console.error('Unexpected error on idle PostgreSQL client', err);
-  process.exit(-1);
-});
+// Promisify SQLite methods for async/await usage
+db.runAsync = promisify(db.run.bind(db));
+db.getAsync = promisify(db.get.bind(db));
+db.allAsync = promisify(db.all.bind(db));
 
 // Initialize database
 async function initializeDatabase() {
-  let client;
   try {
-    console.log('Attempting to connect to PostgreSQL...');
-    client = await pool.connect();
-    console.log('Connected successfully, initializing database...');
-
-    // Create tables
-    await client.query(`
+    console.log('Initializing SQLite database...');
+    
+    // Create visitors table
+    await db.runAsync(`
       CREATE TABLE IF NOT EXISTS visitors (
         ip TEXT PRIMARY KEY,
-        first_visit BIGINT,
-        last_visit BIGINT,
+        first_visit INTEGER,
+        last_visit INTEGER,
         visit_count INTEGER DEFAULT 1
       )
     `);
     console.log('Visitors table ready');
 
-    await client.query(`
+    // Create stats table
+    await db.runAsync(`
       CREATE TABLE IF NOT EXISTS stats (
         key TEXT PRIMARY KEY,
-        value INTEGER
+        value TEXT
       )
     `);
     console.log('Stats table ready');
 
-    // Initialize total_views if it doesn't exist
-    const result = await client.query(
-      'INSERT INTO stats (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING RETURNING value',
-      ['total_views', 0]
-    );
-    
-    if (result.rowCount > 0) {
-      console.log('Initialized total_views with 0');
-    } else {
-      const current = await client.query('SELECT value FROM stats WHERE key = $1', ['total_views']);
-      console.log('Current total_views:', current.rows[0]?.value || 0);
-    }
-
-    console.log('Database initialized successfully');
-  } catch (err) {
-    console.error('Error initializing database:', err);
-    console.error('Stack trace:', err.stack);
-    console.error('Connection details:', {
-      host: new URL(process.env.DATABASE_URL || '').hostname || 'Not available',
-      database: new URL(process.env.DATABASE_URL || '').pathname?.slice(1) || 'Not available'
-    });
-    throw err;
-  } finally {
-    if (client) {
-      client.release();
-    }
-  }
-}
-
-async function recordVisit(ip) {
-  const client = await pool.connect();
-  try {
-    const now = Date.now();
-    
-    // Start transaction
-    await client.query('BEGIN');
-
-    // Check if visitor exists
-    const visitorResult = await client.query(
-      'SELECT * FROM visitors WHERE ip = $1',
-      [ip]
-    );
-
-    let incremented = false;
-    if (!visitorResult.rows[0]) {
-      // New visitor
-      await client.query(
-        'INSERT INTO visitors (ip, first_visit, last_visit, visit_count) VALUES ($1, $2, $3, 1)',
-        [ip, now, now]
-      );
-      await client.query(
-        'UPDATE stats SET value = value + 1 WHERE key = $1',
-        ['total_views']
-      );
-      incremented = true;
-      console.log('New visitor recorded:', { ip, timestamp: new Date(now).toISOString() });
-    } else {
-      const visitor = visitorResult.rows[0];
-      const hoursSinceLastVisit = (now - parseInt(visitor.last_visit)) / (1000 * 60 * 60);
-      
-      if (hoursSinceLastVisit >= 24) {
-        // Update returning visitor after 24 hours
-        await client.query(
-          'UPDATE visitors SET last_visit = $1, visit_count = visit_count + 1 WHERE ip = $2',
-          [now, ip]
-        );
-        await client.query(
-          'UPDATE stats SET value = value + 1 WHERE key = $1',
-          ['total_views']
-        );
-        incremented = true;
-        console.log('Returning visitor updated:', { ip, hoursSinceLastVisit: Math.floor(hoursSinceLastVisit) });
-      } else {
-        console.log('Recent visitor, not counting:', { ip, hoursSinceLastVisit: Math.floor(hoursSinceLastVisit) });
+    // Initialize stats if they don't exist
+    const statsKeys = ['browsers', 'os', 'countries', 'referrers', 'viewCount'];
+    for (const key of statsKeys) {
+      const exists = await db.getAsync('SELECT value FROM stats WHERE key = ?', [key]);
+      if (!exists) {
+        const defaultValue = key === 'viewCount' ? '0' : '{}';
+        await db.runAsync('INSERT INTO stats (key, value) VALUES (?, ?)', [key, defaultValue]);
       }
     }
 
-    // Commit transaction
-    await client.query('COMMIT');
-    return incremented;
-  } catch (err) {
-    await client.query('ROLLBACK');
-    console.error('Error recording visit:', err);
-    console.error('Stack trace:', err.stack);
-    throw err;
-  } finally {
-    client.release();
+    console.log('SQLite database initialized successfully');
+  } catch (error) {
+    console.error('Error initializing SQLite database:', error);
+    console.log('Stack trace:', error.stack);
+    throw error;
   }
 }
 
-async function getStats() {
-  const client = await pool.connect();
+/**
+ * Record a visit from an IP address
+ * @param {string} ip - The IP address of the visitor
+ * @param {Object} visitInfo - Optional information about the visit
+ * @returns {Promise<Object>} - Stats about the visitor
+ */
+async function recordVisit(ip, visitInfo = {}) {
   try {
-    const result = await client.query(`
-      SELECT 
-        (SELECT value FROM stats WHERE key = 'total_views') as total_views,
-        COUNT(*) as unique_visitors,
-        MAX(last_visit) as last_visit
-      FROM visitors
-    `);
+    const now = Date.now();
+    const { browser = 'Unknown', os = 'Unknown', country = 'Unknown', referrer = 'Direct' } = visitInfo;
     
-    const stats = result.rows[0];
-    const response = {
-      totalViews: parseInt(stats.total_views) || 0,
-      uniqueVisitors: parseInt(stats.unique_visitors) || 0,
-      lastVisit: stats.last_visit ? new Date(parseInt(stats.last_visit)).toISOString() : null
+    // Update or insert visitor record
+    const visitor = await db.getAsync('SELECT * FROM visitors WHERE ip = ?', [ip]);
+    
+    if (visitor) {
+      // Update existing visitor
+      await db.runAsync(
+        'UPDATE visitors SET last_visit = ?, visit_count = visit_count + 1 WHERE ip = ?',
+        [now, ip]
+      );
+    } else {
+      // Insert new visitor
+      await db.runAsync(
+        'INSERT INTO visitors (ip, first_visit, last_visit, visit_count) VALUES (?, ?, ?, 1)',
+        [ip, now, now]
+      );
+    }
+
+    // Update stats
+    await updateStats('browsers', browser);
+    await updateStats('os', os);
+    await updateStats('countries', country);
+    await updateStats('referrers', referrer);
+    
+    // Increment view count
+    await incrementViewCount();
+
+    return {
+      ip,
+      visits: visitor ? visitor.visit_count + 1 : 1,
+      firstVisit: visitor ? visitor.first_visit : now,
+      lastVisit: now
     };
-    console.log('Current stats:', response);
-    return response;
-  } catch (err) {
-    console.error('Error getting stats:', err);
-    console.error('Stack trace:', err.stack);
-    throw err;
-  } finally {
-    client.release();
+  } catch (error) {
+    console.error('Error recording visit:', error);
+    return { error: 'Failed to record visit' };
   }
 }
 
-async function getTotalViewCount() {
-  const client = await pool.connect();
+/**
+ * Helper function to update stats counters
+ */
+async function updateStats(statKey, itemKey) {
   try {
-    const result = await client.query(
-      'SELECT value FROM stats WHERE key = $1',
-      ['total_views']
+    // Get current stats
+    const result = await db.getAsync('SELECT value FROM stats WHERE key = ?', [statKey]);
+    let stats = result ? JSON.parse(result.value) : {};
+    
+    // Update counter
+    stats[itemKey] = (stats[itemKey] || 0) + 1;
+    
+    // Save back to database
+    await db.runAsync(
+      'UPDATE stats SET value = ? WHERE key = ?',
+      [JSON.stringify(stats), statKey]
     );
-    const count = result.rows[0]?.value || 0;
-    console.log('Current total views:', count);
-    return count;
-  } catch (err) {
-    console.error('Error getting total view count:', err);
-    console.error('Stack trace:', err.stack);
-    throw err;
-  } finally {
-    client.release();
+  } catch (error) {
+    console.error(`Error updating ${statKey} stats:`, error);
   }
 }
 
-// Handle process termination
-process.on('SIGTERM', () => {
-  console.log('Received SIGTERM signal');
-  pool.end(() => {
-    console.log('Database pool closed');
-    process.exit(0);
-  });
-});
+/**
+ * Helper function to increment the view count
+ */
+async function incrementViewCount() {
+  try {
+    await db.runAsync(
+      'UPDATE stats SET value = CAST((CAST(value AS INTEGER) + 1) AS TEXT) WHERE key = ?',
+      ['viewCount']
+    );
+  } catch (error) {
+    console.error('Error incrementing view count:', error);
+  }
+}
 
-// Export functions
-export {
-  recordVisit,
-  getStats,
-  getTotalViewCount,
-  initializeDatabase
-}; 
+/**
+ * Get all statistics
+ * @returns {Promise<Object>} - All statistics
+ */
+async function getStats() {
+  try {
+    const allStats = await db.allAsync('SELECT key, value FROM stats');
+    const result = {};
+    
+    for (const row of allStats) {
+      if (row.key === 'viewCount') {
+        result[row.key] = parseInt(row.value, 10);
+      } else {
+        result[row.key] = JSON.parse(row.value);
+      }
+    }
+    
+    // Get visitor count
+    const visitorCount = await db.getAsync('SELECT COUNT(*) as count FROM visitors');
+    result.visitorCount = visitorCount.count;
+    
+    return result;
+  } catch (error) {
+    console.error('Error getting stats:', error);
+    return { error: 'Failed to get stats' };
+  }
+}
+
+/**
+ * Get the total view count
+ * @returns {Promise<number>} - The total view count
+ */
+async function getTotalViewCount() {
+  try {
+    const result = await db.getAsync('SELECT value FROM stats WHERE key = ?', ['viewCount']);
+    return result ? parseInt(result.value, 10) : 0;
+  } catch (error) {
+    console.error('Error getting total view count:', error);
+    return 0;
+  }
+}
+
+export { initializeDatabase, recordVisit, getStats, getTotalViewCount }; 
