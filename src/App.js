@@ -15,7 +15,7 @@ window.$primaryLanguageIconId = 'primary-lang-icon';
 window.$secondaryLanguageIconId = 'secondary-lang-icon';
 
 // Backend URL configuration
-const BACKEND_URL =  'https://24.156.182.222';
+const BACKEND_URL =  'https://24.156.182.222:8443';
 // Cookie helper functions
 const setCookie = (name, value, days) => {
   const date = new Date();
@@ -36,7 +36,7 @@ class App extends Component {
     this.state = {
       resumeData: {},
       sharedData: {},
-      peepBasterds: 0
+      Views: 0
     };
     this.hasIncrementedView = false;
   }
