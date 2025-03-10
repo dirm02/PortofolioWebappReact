@@ -18,18 +18,10 @@ console.log('Environment:', {
 
 // CORS configuration
 app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if(!origin) return callback(null, true);
-    if(ALLOWED_ORIGINS.indexOf(origin) === -1) {
-      var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
+  origin: ['https://onlineprofile613dee.netlify.app', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Cache-Control', 'Pragma'],
-  credentials: true,
+  credentials: false,  // Change to false unless you specifically need credentials
   optionsSuccessStatus: 200
 }));
 
