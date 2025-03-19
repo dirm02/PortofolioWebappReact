@@ -38,17 +38,17 @@
       ]
     },
     {
-      "title": "Flight Tracker",
-      "startDate": "2024",
-      "description": "Suivi des vols est une application web qui permet aux utilisateurs de suivre les vols et de consulter les détails de chaque vol. L'application a été développée en utilisant HTML, CSS et un appel à une API.",
+      "title": "RadarQuest",
+      "startDate": "2025",
+      "description": "Développeur compétent en Angular et TypeScript, avec une expérience pratique dans la création d'applications web dynamiques. Capacité démontrée à exploiter les API et à mettre en œuvre la visualisation de données en temps réel grâce à la création d'un site web de suivi de bus. Habile dans le développement d'interfaces réactives et conviviales, la gestion de l'état des applications et l'assurance d'une manipulation efficace des données au sein du framework Angular. Apte à utiliser TypeScript pour un code robuste et maintenable.",
       "images": [
-        "images/portfolio/Project2/FlightTrackProj.png"
+        "images/portfolio/Project2/RadarQuest.png"
       ],
-      "url": "https://github.com/dirm02/FlightTracker.git",
+      "url": "http://24.156.182.222:10035",
       "technologies": [
         {
-          "class": "devicon-react-original",
-          "name": "React"
+          "class": "devicon-angularjs-plain",
+          "name": "Angular"
         },
         {
           "class": "devicon-html5-plain",
@@ -65,44 +65,38 @@
       ]
     },
     {
-      "title": "Angular FastAPI  Python",
-      "startDate": "Jul.2024",
-      "description": "L'une des nombreuses applications sur lesquelles j'ai eu le privilège de travailler. J'étais responsable du développement d'une application d'exploration de cours qui permet aux utilisateurs de rechercher des cours et de consulter les détails de chaque cours. L'application a été développée avec FastAPI pour le backend et Angular pour le frontend.",
+      "title": "SharePoint Web Part Expert",
+      "startDate": "2025",
+      "description": "Développeur SPFx aspirant avec une solide compréhension de TypeScript, React et du Framework SharePoint. Capacité démontrée à construire des composants web et des extensions personnalisés à travers des projets personnels et des formations. Désireux d'appliquer mes connaissances et de contribuer à une équipe axée sur le développement de solutions innovantes pour SharePoint Online. Apprenant rapide avec une passion pour les technologies web modernes et Microsoft 365.",
       "images": [
-        "images/portfolio/Project3/AngularProj.png"
+        "images/portfolio/Project3/SPFx.png"
       ],
-      "url": "https://github.com/dirm02/course_explorer-fastapi_angular-",
+      "url": "https://github.com/dirm02",
       "technologies": [
         {
-          "class": "devicon-angularjs-plain",
-          "name": "Angular"
+          "class": "devicon-react-original",
+          "name": "React"
         },
         {
           "class": "devicon-typescript-plain",
           "name": "TypeScript"
-        },
-        {
-          "class": "devicon-api-plain",
-          "name": "FastAPI"
         }
       ]
     }
   ],
   "experience": [
     {
-      "company": "Outlier",
-      "title": "Training AI how to Code",
-      "years": "Dec.2024 - present",
-      "mainTech": [
-        "Developer"
-      ],
-      "technologies": [
-        "OpenAI",
-        "ChatGPT",
-        "Claude",
-        "Mistral",          
-        "Gemini",
-        "Gemini Pro"
+      "company": "Compucom",
+        "title": "Groceries Stores Scales Programmer",
+        "years": "Jan.2025 - present",
+        "mainTech": [
+          "Developer"
+        ],
+        "technologies": [
+        "TCP/IP",
+        "SharePoint",
+        "Knowledge Base",
+        "Windows Server/Windows 11"  
       ]
     },
     {

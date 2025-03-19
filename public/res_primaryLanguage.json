@@ -46,8 +46,8 @@
         "url": "http://24.156.182.222:10035",
         "technologies": [
           {
-            "class": "devicon-react-original",
-            "name": "React"
+            "class": "devicon-angularjs-plain",
+            "name": "Angular"
           },
           {
             "class": "devicon-html5-plain",
